@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EuroJackpot Analyzer cards - preview</title>
+<!-- Dev harness: loads the real card JS with fake Home Assistant states (fixture.js).
+     Options in the URL hash: #lang=en&theme=light&view=all|last|stats|ticket&width=360 -->
+<style>
+  body { margin: 0; padding: 24px; font-family: Roboto, "Segoe UI", sans-serif; }
+  body.dark { --primary-text-color: #e1e1e1; --secondary-text-color: #9b9b9b; --card-background-color: #1c1c1c;
+    --secondary-background-color: #282828; --divider-color: rgba(225,225,225,.14); background: #111; }
+  body.light { --primary-text-color: #212121; --secondary-text-color: #727272; --card-background-color: #fff;
+    --secondary-background-color: #f1f1f1; --divider-color: rgba(0,0,0,.12); background: #fafafa; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; max-width: 1400px; margin: 0 auto; align-items: start; }
+  .grid.one { grid-template-columns: minmax(0, 560px); }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="dark">
+<div id="grid" class="grid"></div>
+<script>
+  // a minimal stand-in for Home Assistant's <ha-card>
+  class HaCard extends HTMLElement {
+    constructor() { super(); this.attachShadow({ mode: "open" }).innerHTML =
+      `<style>:host{display:block;background:var(--card-background-color);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.35);
+       border:1px solid var(--divider-color);color:var(--primary-text-color)}</style><slot></slot>`; }
+  }
+  customElements.define("ha-card", HaCard);
+</script>
+<script src="fixture.js"></script>
+<script src="../../custom_components/eurojackpot_analyzer/www/eurojackpot-analyzer-card.js"></script>
+<script>
+  const h = new URLSearchParams(location.hash.slice(1));
+  document.body.className = h.get("theme") === "light" ? "light" : "dark";
+  const view = h.get("view") || "all";
+  const hass = {
+    language: h.get("lang") || "el",
+    states: window.FIXTURE,
+    callService: async (domain, service, data) => { console.log("callService", domain, service, data); },
+  };
+  const tags = { last: "eurojackpot-analyzer-last-draw-card", stats: "eurojackpot-analyzer-stats-card", ticket: "eurojackpot-analyzer-ticket-card" };
+  const grid = document.getElementById("grid");
+  if (view !== "all") grid.classList.add("one");
+  if (h.get("width")) { grid.style.maxWidth = h.get("width") + "px"; grid.style.gridTemplateColumns = "minmax(0,1fr)"; document.body.style.padding = "0"; }
+  for (const [k, tag] of Object.entries(tags)) {
+    if (view !== "all" && view !== k) continue;
+    const el = document.createElement(tag);
+    el.setConfig(k === "ticket" ? { columns: 5, algorithm: "auto_column" } : {});
+    el.hass = hass;
+    grid.appendChild(el);
+  }
+</script>
+</body>
+</html>

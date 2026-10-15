@@ -109,3 +109,38 @@ async def test_single_instance_and_options(hass: HomeAssistant) -> None:
     assert flow["type"] == "form"
     done = await hass.config_entries.options.async_configure(flow["flow_id"], {"scan_interval": 60, "price_per_column": 2.0})
     assert done["type"] == "create_entry" and e.options["price_per_column"] == 2.0
+
+
+async def test_full_number_table_for_the_heat_map(hass: HomeAssistant) -> None:
+    await setup(hass)
+    s = hass.states.get("sensor.eurojackpot_analyzer_most_overdue_numbers")
+    all_ = s.attributes["all"]
+    assert [x["number"] for x in all_["main"]] == list(range(1, 51))
+    assert [x["number"] for x in all_["euro"]] == list(range(1, 13))          # the current 1-12 pool
+    assert all(set(x) == {"number", "count", "percent", "draws_since"} for x in all_["main"])
+    assert s.attributes["draws_analysed"] == 998
+
+
+async def test_cards_are_served_and_loaded_automatically(hass: HomeAssistant) -> None:
+    from unittest.mock import MagicMock
+
+    from custom_components.eurojackpot_analyzer import CARD_URL, _async_register_cards
+
+    assert CARD_URL == "/eurojackpot_analyzer/eurojackpot-analyzer-card.js"
+    hass.http = MagicMock()
+    hass.http.async_register_static_paths = AsyncMock()
+    hass.config.components.add("frontend")
+    with patch("homeassistant.components.frontend.add_extra_js_url") as add_js:
+        await _async_register_cards(hass)
+    cfg = hass.http.async_register_static_paths.call_args.args[0][0]
+    assert cfg.url_path == CARD_URL and cfg.path.endswith("eurojackpot-analyzer-card.js")
+    from pathlib import Path
+    assert Path(cfg.path).exists()                                          # the JS file ships with the integration
+    assert add_js.call_args.args[1].startswith(CARD_URL + "?v=")
+
+
+async def test_cards_are_skipped_without_a_web_server(hass: HomeAssistant) -> None:
+    from custom_components.eurojackpot_analyzer import _async_register_cards
+
+    hass.http = None
+    await _async_register_cards(hass)                                       # must not raise

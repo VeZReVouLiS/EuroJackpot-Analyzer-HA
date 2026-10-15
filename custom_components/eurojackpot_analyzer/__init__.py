@@ -1,6 +1,8 @@
 """EuroJackpot: last draw, next draw and jackpot, number statistics and a ticket generator."""
 from __future__ import annotations
 
+from pathlib import Path
+
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -15,6 +17,8 @@ from .const import ALGORITHMS, AUTO_COLUMN, AUTO_TICKET, DOMAIN, MAX_COLUMNS, PE
 from .coordinator import EuroJackpotCoordinator
 
 PLATFORMS = [Platform.SENSOR]
+CARD_FILE = "eurojackpot-analyzer-card.js"
+CARD_URL = f"/{DOMAIN}/{CARD_FILE}"
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 SERVICE_GENERATE_TICKET = "generate_ticket"
@@ -38,7 +42,22 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
     hass.services.async_register(DOMAIN, SERVICE_GENERATE_TICKET, handle_generate, schema=GENERATE_SCHEMA,
                                  supports_response=SupportsResponse.OPTIONAL)
+    await _async_register_cards(hass)
     return True
+
+
+async def _async_register_cards(hass: HomeAssistant) -> None:
+    """Serve the Lovelace cards and load them on every dashboard, so users need no resource setup."""
+    if getattr(hass, "http", None) is None or "frontend" not in hass.config.components:
+        return                                   # headless / test environments
+    from homeassistant.components.frontend import add_extra_js_url
+    from homeassistant.components.http import StaticPathConfig
+    from homeassistant.loader import async_get_integration
+
+    js = Path(__file__).parent / "www" / CARD_FILE
+    await hass.http.async_register_static_paths([StaticPathConfig(CARD_URL, str(js), cache_headers=False)])
+    version = (await async_get_integration(hass, DOMAIN)).version
+    add_extra_js_url(hass, f"{CARD_URL}?v={version}")
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: EuroJackpotConfigEntry) -> bool:

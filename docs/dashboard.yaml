@@ -1,0 +1,119 @@
+# Παράδειγμα dashboard για το EuroJackpot Analyzer.
+# Dashboards -> Προσθήκη dashboard -> (νέο) -> ⋮ -> Raw configuration editor -> επικόλληση.
+views:
+- title: EuroJackpot Analyzer
+  path: eurojackpot
+  type: sections
+  max_columns: 3
+  sections:
+  - type: grid
+    cards:
+    - type: heading
+      heading: Τελευταία κλήρωση
+      icon: mdi:ticket-confirmation
+    - type: tile
+      entity: sensor.eurojackpot_analyzer_last_draw
+      name: Ημερομηνία
+      grid_options:
+        columns: 12
+    - type: tile
+      entity: sensor.eurojackpot_analyzer_next_draw
+      name: Επόμενη κλήρωση
+      grid_options:
+        columns: 6
+    - type: tile
+      entity: sensor.eurojackpot_analyzer_jackpot
+      name: Τζάκποτ
+      grid_options:
+        columns: 6
+    - type: markdown
+      content: |-
+        {% macro n(v) %}{{ '{:,.0f}'.format(v).replace(',', '.') }}{% endmacro %}{% macro m(v) %}{{ '{:,.2f}'.format(v).replace(',', 'X').replace('.', ',').replace('X', '.') }} €{% endmacro %}
+        ## {{ state_attr('sensor.eurojackpot_analyzer_last_draw', 'text') }}
+        Κλήρωση #{{ state_attr('sensor.eurojackpot_analyzer_last_draw', 'draw_number') }} · στήλες Ελλάδας: {{ n(state_attr('sensor.eurojackpot_analyzer_last_draw', 'columns_greece') or 0) }}
+
+        | Κατηγορία | Επιτυχίες | Ελλάδα | Κέρδος |
+        |:--|--:|--:|--:|
+        {% for p in state_attr('sensor.eurojackpot_analyzer_last_draw', 'prizes') -%}
+        | {{ p.tier }} | {{ n(p.winners_all_countries) }} | {{ n(p.winners_greece) if p.winners_greece is not none else '—' }} | {{ m(p.prize_per_winner) }} |
+        {% endfor %}
+      grid_options:
+        columns: 12
+  - type: grid
+    cards:
+    - type: heading
+      heading: Στατιστικά αριθμών
+      icon: mdi:chart-bar
+    - type: tile
+      entity: sensor.eurojackpot_analyzer_most_overdue_numbers
+      name: Καθυστερούν περισσότερο
+      grid_options:
+        columns: 12
+    - type: tile
+      entity: sensor.eurojackpot_analyzer_most_frequent_numbers
+      name: Συχνότεροι
+      grid_options:
+        columns: 12
+    - type: tile
+      entity: sensor.eurojackpot_analyzer_least_frequent_numbers
+      name: Σπανιότεροι
+      grid_options:
+        columns: 12
+    - type: markdown
+      content: |-
+        **Πόσες κληρώσεις έχουν περάσει από την τελευταία εμφάνιση**
+
+        | Αριθμός | Χωρίς εμφάνιση | Μέγιστη καθυστέρηση |
+        |:--|--:|--:|
+        {% for n in state_attr('sensor.eurojackpot_analyzer_most_overdue_numbers', 'main')[:5] -%}
+        | **{{ n.number }}** | {{ n.draws_since }} κληρώσεις | {{ n.longest_gap }} |
+        {% endfor %}
+        Αριθμοί Euro: {% for n in state_attr('sensor.eurojackpot_analyzer_most_overdue_numbers', 'euro')[:3] %}**{{ n.number }}** ({{ n.draws_since }}){{ ', ' if not loop.last }}{% endfor %}
+      grid_options:
+        columns: 12
+  - type: grid
+    cards:
+    - type: heading
+      heading: Δελτίο
+      icon: mdi:dice-multiple
+    - type: button
+      name: Δελτίο 5 στηλών
+      icon: mdi:dice-5
+      tap_action:
+        action: perform-action
+        perform_action: eurojackpot_analyzer.generate_ticket
+        data:
+          columns: 5
+          algorithm: auto_column
+          period: all
+      grid_options:
+        columns: 6
+        rows: 2
+    - type: button
+      name: Δελτίο 12 στηλών
+      icon: mdi:dice-multiple
+      tap_action:
+        action: perform-action
+        perform_action: eurojackpot_analyzer.generate_ticket
+        data:
+          columns: 12
+          algorithm: auto_ticket
+          period: all
+      grid_options:
+        columns: 6
+        rows: 2
+    - type: markdown
+      content: |-
+        {% set t = state_attr('sensor.eurojackpot_analyzer_generated_ticket', 'columns') %}
+        {% if t %}
+        | Στήλη | Αριθμοί | Αλγόριθμος |
+        |:--|:--|:--|
+        {% for c in t -%}
+        | {{ loop.index }} | **{{ c.text }}** | {{ {'random': 'Τυχαίος', 'hot': 'Συχνοί', 'cold': 'Σπάνιοι', 'overdue': 'Καθυστερημένοι', 'weighted': 'Σταθμισμένος', 'balanced': 'Ισορροπημένος', 'smart': 'Έξυπνος'}[c.algorithm] }} |
+        {% endfor %}
+        **Σύνολο: {{ '{:,.2f}'.format(state_attr('sensor.eurojackpot_analyzer_generated_ticket', 'total_cost')).replace('.', ',') }} €** ({{ state_attr('sensor.eurojackpot_analyzer_generated_ticket', 'column_count') }} × {{ '{:,.2f}'.format(state_attr('sensor.eurojackpot_analyzer_generated_ticket', 'price_per_column')).replace('.', ',') }} €)
+        {% else %}
+        Πάτα ένα από τα κουμπιά για να δημιουργηθεί δελτίο.
+        {% endif %}
+      grid_options:
+        columns: 12

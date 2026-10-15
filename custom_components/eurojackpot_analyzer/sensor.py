@@ -60,7 +60,8 @@ SENSORS: tuple[EuroJackpotSensorDescription, ...] = (
     EuroJackpotSensorDescription(
         key="overdue_numbers", translation_key="overdue_numbers", icon="mdi:timer-sand",
         value_fn=lambda d: _top_state(d["tops"], "overdue"),
-        attrs_fn=lambda d: {"main": d["tops"]["overdue"]["main"], "euro": d["tops"]["overdue"]["euro"]}),
+        attrs_fn=lambda d: {"main": d["tops"]["overdue"]["main"], "euro": d["tops"]["overdue"]["euro"],
+                            "all": d["tops"]["all"], "draws_analysed": d["tops"]["draws_analysed"]}),
     EuroJackpotSensorDescription(
         key="frequent_numbers", translation_key="frequent_numbers", icon="mdi:fire",
         value_fn=lambda d: _top_state(d["tops"], "frequent"),
@@ -94,6 +95,8 @@ class _Base(CoordinatorEntity[EuroJackpotCoordinator], SensorEntity):
 
 class EuroJackpotSensor(_Base):
     entity_description: EuroJackpotSensorDescription
+    # big attributes only the cards need: keep them out of the recorder database
+    _unrecorded_attributes = frozenset({"all", "prizes"})
 
     def __init__(self, coordinator, entry_id: str, description: EuroJackpotSensorDescription) -> None:
         super().__init__(coordinator, entry_id, description.key)

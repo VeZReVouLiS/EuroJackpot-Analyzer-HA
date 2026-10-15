@@ -68,4 +68,11 @@ def top_lists(st: dict, n_main: int = 10, n_euro: int = 3) -> dict:
             "euro": pick(euro, order_euro, n_euro, "overdue" if key == "overdue" else "freq"),
         }
     result["draws_analysed"] = st["n_draws"]
+    # the complete table for the heat-map card (every number, current euro pool only)
+    result["all"] = {
+        "main": [{"number": x["n"], "count": x["count"], "percent": x["pct"], "draws_since": x["gap"]}
+                 for x in st["main"]],
+        "euro": [{"number": x["n"], "count": x["count"], "percent": x["pct"], "draws_since": x["gap"]}
+                 for x in st["euro"] if x["active"]],
+    }
     return result
