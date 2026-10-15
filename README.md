@@ -1,24 +1,57 @@
 # EuroJackpot Analyzer για Home Assistant
 
-Custom integration (HACS) που φέρνει το EuroJackpot στο Home Assistant:
+Το EuroJackpot στο Home Assistant, με δικό του **panel στο πλαϊνό μενού** που γεμίζει όλη την οθόνη:
 
-- **Τελευταία κλήρωση**: αριθμοί, επιτυχίες και κέρδη ανά κατηγορία (σύνολο χωρών και Ελλάδα).
-- **Επόμενη κλήρωση και τζάκποτ**.
-- **Στατιστικά αριθμών**: καθυστερημένοι, συχνοί και σπάνιοι αριθμοί (από όλο το ιστορικό από το 2012).
-- **Γεννήτρια δελτίων**: service που φτιάχνει δελτίο 1–12 στηλών με αλγόριθμο της επιλογής σου και επιστρέφει τις στήλες και το συνολικό κόστος (2,50 € ανά στήλη).
+- **Τελευταία κλήρωση**: αριθμοί, επιτυχίες και κέρδη ανά κατηγορία (σύνολο χωρών και Ελλάδα) και **μεγάλο τζάκποτ**.
+- **Επόμενη κλήρωση** με αντίστροφη μέτρηση.
+- **Χάρτης καθυστέρησης** των 50 αριθμών με χρώματα, και κατατάξεις: αριθμοί που καθυστερούν, συχνότεροι, σπανιότεροι.
+- **Γεννήτρια δελτίων** 1–12 στηλών με 7 αλγορίθμους ή αυτόματη επιλογή, με σύνολο κόστους (2,50 € ανά στήλη).
+- **Ελληνικά / English** με κουμπί που αλλάζει αμέσως.
 
 Δεν χρειάζεται λογαριασμός ούτε API key. Τα δεδομένα έρχονται από την Allwyn και την επίσημη υπηρεσία του EuroJackpot.
-Το ιστορικό είναι ήδη ενσωματωμένο, οπότε δουλεύει αμέσως και χωρίς internet.
+Το ιστορικό από το 2012 είναι ήδη ενσωματωμένο, οπότε δουλεύει αμέσως και χωρίς internet.
 
 Είναι η αδελφή ενσωμάτωση της εφαρμογής Windows
-[EuroJackpot Analyzer](https://github.com/VeZReVouLiS/EuroJackpot-Analyzer): ίδιοι αλγόριθμοι, ίδια στατιστικά.
+[EuroJackpot Analyzer](https://github.com/VeZReVouLiS/EuroJackpot-Analyzer): ίδιοι αλγόριθμοι, ίδια στατιστικά, ίδια εμφάνιση.
+
+![Το panel EuroJackpot Analyzer](docs/images/01-panel.png)
 
 ## Εγκατάσταση (HACS)
 1. HACS → ⋮ → **Custom repositories** → πρόσθεσε `https://github.com/VeZReVouLiS/EuroJackpot-Analyzer-HA` με τύπο **Integration**.
 2. Κατέβασε το **EuroJackpot Analyzer** και κάνε επανεκκίνηση του Home Assistant.
 3. **Ρυθμίσεις → Συσκευές και υπηρεσίες → Προσθήκη ενσωμάτωσης → EuroJackpot Analyzer**. Ένα κλικ, χωρίς ρυθμίσεις.
+4. Στο πλαϊνό μενού εμφανίζεται η καταχώρηση **EuroJackpot Analyzer**. Ανοίγει το panel.
 
 Χειροκίνητα: αντίγραψε τον φάκελο `custom_components/eurojackpot_analyzer` στο `config/custom_components/`.
+
+> **Μετά από κάθε ενημέρωση** κάνε επανεκκίνηση του Home Assistant και ανανέωσε τη σελίδα με **Ctrl+F5**,
+> ώστε ο browser να πάρει το νέο πρόγραμμα του panel.
+
+![Η ενσωμάτωση στις Συσκευές και υπηρεσίες](docs/images/04-integration.png)
+
+## Το panel
+Το panel προσαρμόζεται στο μέγεθος του παραθύρου: σε μεγάλη οθόνη PC τα γράμματα, οι αριθμοί και τα πεδία μεγαλώνουν και οι τρεις στήλες
+(κλήρωση, στατιστικά, δελτίο) γεμίζουν όλο το πλάτος. Σε μικρότερο παράθυρο ή κινητό περνούν σε δύο ή μία στήλη.
+
+- **Ελληνικά / English**: το κουμπί πάνω δεξιά αλλάζει τη γλώσσα αμέσως, χωρίς refresh, και θυμάται την επιλογή σου στον browser.
+  Αν δεν έχεις διαλέξει, χρησιμοποιείται η γλώσσα του χρήστη του Home Assistant.
+- **Ανανέωση**: ζητά αμέσως νέα δεδομένα.
+- Ο **χάρτης καθυστέρησης** δείχνει για κάθε αριθμό πόσες κληρώσεις έχουν περάσει από την τελευταία φορά που βγήκε (κόκκινο = καθυστερεί περισσότερο). Με το ποντίκι πάνω σε έναν αριθμό βλέπεις πόσες φορές έχει βγει συνολικά.
+
+![Το panel στα αγγλικά](docs/images/02-panel-en.png)
+
+## Κάρτες για τα δικά σου dashboards
+Οι ίδιες οθόνες είναι διαθέσιμες και ως κάρτες Lovelace. Φορτώνονται αυτόματα από το integration, χωρίς καμία ρύθμιση πόρων:
+
+| Κάρτα | Τι δείχνει |
+|---|---|
+| `custom:eurojackpot-analyzer-last-draw-card` | τελευταία κλήρωση, τζάκποτ, επόμενη κλήρωση, πίνακας κερδών (`show_prizes: false` για να κρυφτεί) |
+| `custom:eurojackpot-analyzer-stats-card` | χάρτης καθυστέρησης και κατατάξεις |
+| `custom:eurojackpot-analyzer-ticket-card` | γεννήτρια δελτίου (`columns`, `algorithm` για τις αρχικές τιμές) |
+
+Όλες δέχονται `language: el` ή `en` αν θέλεις σταθερή γλώσσα. Έτοιμο παράδειγμα dashboard: [docs/dashboard.yaml](docs/dashboard.yaml).
+
+![Οι κάρτες σε dashboard](docs/images/03-dashboard-cards.png)
 
 ## Οντότητες
 | Οντότητα | Τιμή | Attributes |
@@ -26,12 +59,14 @@ Custom integration (HACS) που φέρνει το EuroJackpot στο Home Assis
 | `sensor.eurojackpot_analyzer_last_draw` | ημερομηνία τελευταίας κλήρωσης | `numbers`, `euro_numbers`, `text`, `draw_number`, `prizes` (νικητές όλων των χωρών / Ελλάδας και κέρδος ανά κατηγορία), `columns_greece`, `columns_all_countries` |
 | `sensor.eurojackpot_analyzer_next_draw` | ημερομηνία και ώρα επόμενης κλήρωσης | `draw_number` |
 | `sensor.eurojackpot_analyzer_jackpot` | τζάκποτ σε € | `next_draw` |
-| `sensor.eurojackpot_analyzer_most_overdue_numbers` | οι 5 αριθμοί που καθυστερούν περισσότερο | `main` και `euro` με `draws_since`, `longest_gap`, `last_seen` |
+| `sensor.eurojackpot_analyzer_most_overdue_numbers` | οι 5 αριθμοί που καθυστερούν περισσότερο | `main` και `euro` με `draws_since`, `longest_gap`, `last_seen`, ο πλήρης πίνακας `all` |
 | `sensor.eurojackpot_analyzer_most_frequent_numbers` | οι 5 συχνότεροι αριθμοί | `main` και `euro` με `count`, `percent` |
 | `sensor.eurojackpot_analyzer_least_frequent_numbers` | οι 5 σπανιότεροι αριθμοί | όπως παραπάνω |
 | `sensor.eurojackpot_analyzer_generated_ticket` | στήλες του τελευταίου δελτίου | `columns`, `total_cost`, `algorithm`, `generated_at` |
 
-Τα ονόματα εμφανίζονται στα ελληνικά ή στα αγγλικά ανάλογα με τη γλώσσα του HA.
+Τα ονόματα εμφανίζονται στα ελληνικά ή στα αγγλικά ανάλογα με τη γλώσσα του HA (τα entity IDs είναι πάντα τα αγγλικά της λίστας).
+
+![Οι οντότητες της συσκευής](docs/images/05-device.png)
 
 ## Service `eurojackpot_analyzer.generate_ticket`
 | Πεδίο | Τιμές | Προεπιλογή |
@@ -54,22 +89,11 @@ data:
 response_variable: ticket
 ```
 
+![Εκτέλεση του service](docs/images/06-service.png)
+
 > Η κλήρωση είναι τυχαία. Τα στατιστικά δεν αυξάνουν τις πιθανότητες νίκης. Παίξε υπεύθυνα (18+).
 
-## Παραδείγματα
-**Κάρτα Markdown με την τελευταία κλήρωση**
-
-```yaml
-type: markdown
-title: EuroJackpot Analyzer
-content: >
-  **{{ states('sensor.eurojackpot_analyzer_last_draw') }}**
-  {{ state_attr('sensor.eurojackpot_analyzer_last_draw', 'text') }}
-
-  Επόμενη: {{ as_timestamp(states('sensor.eurojackpot_analyzer_next_draw')) | timestamp_custom('%a %d/%m %H:%M') }}
-  · Τζάκποτ {{ states('sensor.eurojackpot_analyzer_jackpot') | int | round(0) | string }} €
-```
-
+## Παραδείγματα αυτοματισμών
 **Ειδοποίηση όταν βγει νέα κλήρωση**
 
 ```yaml
@@ -80,7 +104,7 @@ triggers:
 actions:
   - action: notify.notify
     data:
-      title: EuroJackpot Analyzer
+      title: EuroJackpot
       message: >
         Κλήρωση {{ states('sensor.eurojackpot_analyzer_last_draw') }}:
         {{ state_attr('sensor.eurojackpot_analyzer_last_draw', 'text') }}
@@ -115,7 +139,11 @@ actions:
 αυτόματα από το [EuroJackpot-Analyzer](https://github.com/VeZReVouLiS/EuroJackpot-Analyzer) (`tools/sync_ha.ps1`). Μην τα
 αλλάζεις εδώ.
 
+Το front-end είναι ένα αρχείο χωρίς framework και χωρίς build (`www/eurojackpot-analyzer-card.js`). Για να το δεις χωρίς Home Assistant:
+`python tools/make_preview_fixture.py` και άνοιξε το `tools/preview/index.html` (παράμετροι στο hash: `#view=panel&lang=en&theme=light`).
+
 ```bash
 python -m venv .venv && .venv/bin/pip install pytest-homeassistant-custom-component
 .venv/bin/python -m pytest -q
 ```
+Το Home Assistant core δεν τρέχει σε Windows· τα tests τρέχουν στο GitHub Actions (tests, hassfest και έλεγχος HACS).
