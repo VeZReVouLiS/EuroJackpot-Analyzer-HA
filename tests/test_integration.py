@@ -52,7 +52,7 @@ async def test_sensors(hass: HomeAssistant) -> None:
     assert datetime.fromisoformat(nxt.state) == datetime(2026, 10, 16, 18, 0, tzinfo=timezone.utc)
     jackpot = hass.states.get("sensor.eurojackpot_analyzer_jackpot")
     assert float(jackpot.state) == 10000000.0 and jackpot.attributes["unit_of_measurement"] == "€"
-    for key in ("overdue_numbers", "frequent_numbers", "rare_numbers"):
+    for key in ("most_overdue_numbers", "most_frequent_numbers", "least_frequent_numbers"):
         s = hass.states.get(f"sensor.eurojackpot_analyzer_{key}")
         assert s.state not in ("unknown", "unavailable") and len(s.attributes["main"]) == 10
         assert len(s.attributes["euro"]) == 3

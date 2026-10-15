@@ -26,9 +26,9 @@ Custom integration (HACS) που φέρνει το EuroJackpot στο Home Assis
 | `sensor.eurojackpot_analyzer_last_draw` | ημερομηνία τελευταίας κλήρωσης | `numbers`, `euro_numbers`, `text`, `draw_number`, `prizes` (νικητές όλων των χωρών / Ελλάδας και κέρδος ανά κατηγορία), `columns_greece`, `columns_all_countries` |
 | `sensor.eurojackpot_analyzer_next_draw` | ημερομηνία και ώρα επόμενης κλήρωσης | `draw_number` |
 | `sensor.eurojackpot_analyzer_jackpot` | τζάκποτ σε € | `next_draw` |
-| `sensor.eurojackpot_analyzer_overdue_numbers` | οι 5 αριθμοί που καθυστερούν περισσότερο | `main` και `euro` με `draws_since`, `longest_gap`, `last_seen` |
-| `sensor.eurojackpot_analyzer_frequent_numbers` | οι 5 συχνότεροι αριθμοί | `main` και `euro` με `count`, `percent` |
-| `sensor.eurojackpot_analyzer_rare_numbers` | οι 5 σπανιότεροι αριθμοί | όπως παραπάνω |
+| `sensor.eurojackpot_analyzer_most_overdue_numbers` | οι 5 αριθμοί που καθυστερούν περισσότερο | `main` και `euro` με `draws_since`, `longest_gap`, `last_seen` |
+| `sensor.eurojackpot_analyzer_most_frequent_numbers` | οι 5 συχνότεροι αριθμοί | `main` και `euro` με `count`, `percent` |
+| `sensor.eurojackpot_analyzer_least_frequent_numbers` | οι 5 σπανιότεροι αριθμοί | όπως παραπάνω |
 | `sensor.eurojackpot_analyzer_generated_ticket` | στήλες του τελευταίου δελτίου | `columns`, `total_cost`, `algorithm`, `generated_at` |
 
 Τα ονόματα εμφανίζονται στα ελληνικά ή στα αγγλικά ανάλογα με τη γλώσσα του HA.
