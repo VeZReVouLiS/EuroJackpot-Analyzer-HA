@@ -8,7 +8,7 @@
  * scale the whole UI just by changing its font size, and the cards use container queries so they adapt
  * to the width of whatever holds them.
  */
-const EJ_VERSION = "0.3.1";
+const EJ_VERSION = "0.3.2";
 const DOMAIN = "eurojackpot_analyzer";
 const ID = {
   last: `sensor.${DOMAIN}_last_draw`,
@@ -99,9 +99,9 @@ ha-card { position: relative; overflow: hidden; color: var(--primary-text-color)
 .jp .when { text-align: right; font-size: .92em; color: var(--secondary-text-color); }
 .jp .amt { font-size: clamp(1.7em, 9cqw, 2.9em); font-weight: 900; line-height: 1.1; letter-spacing: -.02em;
   background: linear-gradient(135deg, #f59e0b, #d97706 55%, #b45309); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.label { font-size: .78em; text-transform: uppercase; letter-spacing: .06em; color: var(--secondary-text-color); font-weight: 600; }
+.label { font-size: .86em; color: var(--secondary-text-color); font-weight: 600; }
 table { width: 100%; border-collapse: collapse; font-size: .98em; margin-top: .4em; }
-th { text-align: right; font-size: .74em; text-transform: uppercase; letter-spacing: .05em; color: var(--secondary-text-color); font-weight: 600; padding: .5em .6em; }
+th { text-align: right; font-size: .82em; color: var(--secondary-text-color); font-weight: 600; padding: .5em .6em; }
 td { text-align: right; padding: .5em .6em; border-top: 1px solid var(--divider-color); font-variant-numeric: tabular-nums; }
 th:first-child, td:first-child { text-align: left; font-weight: 700; white-space: nowrap; }
 tr.gr td { background: rgba(52,211,153,.10); }
