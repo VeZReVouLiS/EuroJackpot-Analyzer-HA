@@ -3,7 +3,7 @@
 One JavaScript file ships with the integration. It defines the full-screen panel (shown in the sidebar, like
 GR e-Pass) and the three Lovelace cards. This module serves it and registers it:
 
-* the static path once per Home Assistant run (aiohttp cannot remove a route, registering it again raises);
+* the static paths (card file + assets folder) once per Home Assistant run (aiohttp cannot remove a route, registering it again raises);
 * the sidebar panel once per instance (removed when the last entry unloads);
 * the module on every dashboard (add_extra_js_url) so the cards need no resource setup.
 
@@ -24,6 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 
 CARD_FILE = "eurojackpot-analyzer-card.js"
 CARD_URL = f"/{DOMAIN}/{CARD_FILE}"
+ASSETS_URL = f"/{DOMAIN}/assets"
 PANEL_COMPONENT = "eurojackpot-analyzer-panel"
 PANEL_PATH = "eurojackpot"                 # the sidebar entry opens /eurojackpot
 PANEL_TITLE = "EuroJackpot Analyzer"
@@ -43,7 +44,11 @@ async def async_register_ui(hass: HomeAssistant, _component: str = "frontend") -
 
     source = Path(__file__).parent / "www" / CARD_FILE
     if not hass.data.get(_STATIC_SERVED):
-        await hass.http.async_register_static_paths([StaticPathConfig(CARD_URL, str(source), cache_headers=False)])
+        await hass.http.async_register_static_paths([
+            StaticPathConfig(CARD_URL, str(source), cache_headers=False),
+            # flags, logo and countries.json (copied from the Windows app by tools/sync_ha_core.py)
+            StaticPathConfig(ASSETS_URL, str(source.parent / "assets"), cache_headers=False),
+        ])
         hass.data[_STATIC_SERVED] = True
 
     integration = await async_get_integration(hass, DOMAIN)

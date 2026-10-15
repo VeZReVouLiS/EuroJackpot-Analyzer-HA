@@ -37,6 +37,7 @@ class EuroJackpotCoordinator(DataUpdateCoordinator[dict]):
         self.last_ticket: dict | None = None
         self._tops: dict | None = None
         self._stats_for: str | None = None      # last draw date the cached statistics belong to
+        self._official_for: tuple[str, dict | None] | None = None   # (draw date, official result) cache
 
     @property
     def price(self) -> float:
@@ -74,6 +75,21 @@ class EuroJackpotCoordinator(DataUpdateCoordinator[dict]):
                 out.append(d)
         return out
 
+    async def _with_official(self, last: dict) -> dict:
+        """Merge the official result of the last draw (where-won per country/state, sales). Best effort, cached."""
+        if self._official_for is None or self._official_for[0] != last["date"] or self._official_for[1] is None:
+            try:
+                official = await self.client.official_day(date.fromisoformat(last["date"]))
+            except SourceError as err:
+                _LOGGER.debug("Official source unavailable for the where-won data: %s", err)
+                official = None
+            self._official_for = (last["date"], official)
+        official = self._official_for[1]
+        if not official:
+            return last
+        return {**last, "classes": logic.merge_where(last.get("classes", []), official),
+                "stake_all": last.get("stake_all") or official.get("stake_all")}
+
     async def _async_update_data(self) -> dict:
         last = nxt = None
         try:
@@ -90,6 +106,8 @@ class EuroJackpotCoordinator(DataUpdateCoordinator[dict]):
                 if not self.rows:
                     raise UpdateFailed(f"No data source available: {err}") from err
                 _LOGGER.warning("Data sources unavailable, using stored history: %s", err)
+        if last:                                 # official data adds where the winners are and the total sales
+            last = await self._with_official(last)
         changed = False
         if last:
             try:

@@ -44,6 +44,20 @@ def parse_allwyn_active(active: dict | None) -> dict | None:
             "draw_number": active.get("drawId"), "jackpot": jackpot}
 
 
+def parse_where(aufteilung) -> list[dict]:
+    """Where the winners of a class are: [{"alpha3","code","winners","region"?}] (Germany is split by state)."""
+    out = []
+    for a in aufteilung or []:
+        try:
+            item = {"alpha3": str(a["landAlpha3"]), "code": str(a.get("kuerzel") or ""), "winners": int(a["anzahl"])}
+        except (KeyError, TypeError, ValueError):
+            continue
+        if a.get("provinz"):
+            item["region"] = str(a["provinz"])
+        out.append(item)
+    return out
+
+
 def parse_official(payload: dict | None) -> dict | None:
     """Official eurojackpot.com JSON (one draw date) -> same shape as parse_allwyn (without Greek data)."""
     if not payload or payload.get("error") or "head" not in payload:
@@ -60,10 +74,18 @@ def parse_official(payload: dict | None) -> dict | None:
     classes = []
     try:
         for r in payload["auswertung"]["quoten"]["hauptlotterie"]["ziehungen"][0]["gewinnklassen"]:
-            classes.append({"tier": str(r.get("kurzbeschreibung", "")).replace(" ", ""),
-                            "winners": int(r.get("anzahl") or 0), "winners_gr": None,
-                            "prize": float(r.get("quote") or 0)})
+            cls = {"tier": str(r.get("kurzbeschreibung", "")).replace(" ", ""),
+                   "winners": int(r.get("anzahl") or 0), "winners_gr": None,
+                   "prize": float(r.get("quote") or 0)}
+            where = parse_where(r.get("aufteilung"))
+            if where:                       # only the first three classes have it
+                cls["where"] = where
+            classes.append(cls)
     except (KeyError, IndexError, TypeError, ValueError):
         classes = []
+    try:
+        stake = float(payload["auswertung"]["spieleinsatz"]["hauptlotterie"])
+    except (KeyError, TypeError, ValueError):
+        stake = None
     return {"date": date_str, "main": sorted(main), "euro": sorted(euro), "draw_number": None,
-            "classes": classes, "columns_gr": None, "columns_all": None}
+            "classes": classes, "columns_gr": None, "columns_all": None, "stake_all": stake}

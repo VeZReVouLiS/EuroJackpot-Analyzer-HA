@@ -1,0 +1,95 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Fügt die letzte Ziehung, die nächste Ziehung mit Jackpot, Zahlenstatistiken und einen Spielschein-Generator hinzu. Die Daten stammen von Allwyn und dem offiziellen EuroJackpot-Dienst. Kein Konto nötig."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "EuroJackpot Analyzer – Optionen",
+        "data": {
+          "scan_interval": "Aktualisierungsintervall (Minuten)",
+          "price_per_column": "Preis pro Feld (€)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Letzte Ziehung"
+      },
+      "next_draw": {
+        "name": "Nächste Ziehung"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Am längsten überfällige Zahlen"
+      },
+      "frequent_numbers": {
+        "name": "Am häufigsten gezogene Zahlen"
+      },
+      "rare_numbers": {
+        "name": "Am seltensten gezogene Zahlen"
+      },
+      "generated_ticket": {
+        "name": "Erstellter Spielschein"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Spielschein erstellen",
+      "description": "Erstellt einen Spielschein mit 1 bis 12 Feldern (je 5 Zahlen + 2 Eurozahlen) anhand der Zahlenstatistik und liefert die Felder und die Gesamtkosten.",
+      "fields": {
+        "columns": {
+          "name": "Felder",
+          "description": "Anzahl der Felder (1–12)."
+        },
+        "algorithm": {
+          "name": "Algorithmus",
+          "description": "Wie die Zahlen gewählt werden. Die automatischen Optionen wählen einen zufälligen Algorithmus pro Schein oder pro Feld."
+        },
+        "period": {
+          "name": "Zeitraum",
+          "description": "Der Teil der Historie, auf dem die Statistik basiert."
+        }
+      }
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatisch – ein zufälliger Algorithmus pro Schein",
+        "auto_column": "Automatisch – zufälliger Algorithmus pro Feld",
+        "random": "Reiner Zufall",
+        "hot": "Heiße Zahlen",
+        "cold": "Kalte Zahlen",
+        "overdue": "Überfällige Zahlen",
+        "weighted": "Nach Häufigkeit gewichtet",
+        "balanced": "Ausgewogen (heiß + überfällig)",
+        "smart": "Intelligentes Muster (ungerade/gerade, Summe)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Alle Ziehungen",
+        "10y": "Letzte 10 Jahre",
+        "5y": "Letzte 5 Jahre",
+        "3y": "Letzte 3 Jahre",
+        "1y": "Letztes Jahr",
+        "last_100": "Letzte 100 Ziehungen",
+        "last_50": "Letzte 50 Ziehungen"
+      }
+    }
+  }
+}

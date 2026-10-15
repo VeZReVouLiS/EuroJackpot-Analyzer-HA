@@ -32,7 +32,9 @@ def _last_attrs(data: dict) -> dict[str, Any]:
         "columns_greece": last.get("columns_gr"), "columns_all_countries": last.get("columns_all"),
         "prizes": [
             {"tier": c["tier"], "winners_all_countries": c["winners"], "winners_greece": c.get("winners_gr"),
-             "prize_per_winner": c["prize"]} for c in last.get("classes", [])],
+             "prize_per_winner": c["prize"], **({"where_won": c["where"]} if c.get("where") else {})}
+            for c in last.get("classes", [])],
+        "total_sales": last.get("stake_all"),
         "draws_in_history": data["count"], "history_since": data["first_date"],
     }
 

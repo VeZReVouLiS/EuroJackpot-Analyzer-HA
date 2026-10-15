@@ -20,7 +20,7 @@ ALLWYN_BASE = "https://api.opap.gr/draws/v3.0/5149"
 ALLWYN_REFERER = "https://www.allwyn.gr/"
 OFFICIAL_URL = (
     "https://www.eurojackpot.com/wlinfo/WL_InfoService"
-    "?client=jsn&gruppe=ZahlenUndQuoten&spielart=EJ&datum={d}"
+    "?client=jsn&gruppe=ZahlenUndQuoten&spielart=EJ&adg=ja&datum={d}"
 )
 OFFICIAL_REFERER = "https://www.eurojackpot.com/"
 ALLWYN_FIRST_DATE = "2024-03-08"           # Greek draws exist since then

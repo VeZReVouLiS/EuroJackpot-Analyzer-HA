@@ -74,3 +74,30 @@ def test_periods():
     assert logic.compute_stats(ROWS, "last_2")["n_draws"] == 2
     assert logic.compute_stats(ROWS, "1y")["n_draws"] == 3
     assert logic.compute_stats(ROWS, "all")["n_draws"] == 3
+
+
+def test_official_where_won_is_parsed_and_merged():
+    rows = [
+        {"kurzbeschreibung": "5 + 2", "anzahl": 1, "quote": 120000000.0,
+         "aufteilung": [{"landAlpha3": "DEU", "kuerzel": "DE", "anzahl": 1, "provinz": "Nordrhein-Westfalen"}]},
+        {"kurzbeschreibung": "5 + 1", "anzahl": 7, "quote": 2981587.2,
+         "aufteilung": [{"landAlpha3": "DNK", "kuerzel": "DK", "anzahl": 1}, {"landAlpha3": "bad"}]},
+        {"kurzbeschreibung": "4 + 2", "anzahl": 169, "quote": 1780.0},
+    ]
+    payload = {
+        "error": None, "head": {"datum": "2026-10-13"},
+        "zahlen": {"hauptlotterie": {"ziehungen": [{"zahlen": ["35", "20", "22", "17", "11"]}, {"zahlen": ["4", "8"]}]}},
+        "auswertung": {
+            "spieleinsatz": {"hauptlotterie": "75205218.00"},
+            "quoten": {"hauptlotterie": {"ziehungen": [{"gewinnklassen": rows}]}},
+        },
+    }
+    d = parse_official(payload)
+    assert d["stake_all"] == 75205218.0
+    assert d["classes"][0]["where"] == [{"alpha3": "DEU", "code": "DE", "winners": 1, "region": "Nordrhein-Westfalen"}]
+    assert d["classes"][1]["where"] == [{"alpha3": "DNK", "code": "DK", "winners": 1}]
+    assert "where" not in d["classes"][2]
+    allwyn = [{"tier": "5+2", "winners": 1, "winners_gr": 0, "prize": 1.0}, {"tier": "4+2", "winners": 169}]
+    merged = logic.merge_where(allwyn, d)
+    assert merged[0]["where"][0]["alpha3"] == "DEU" and "where" not in merged[1]
+    assert logic.merge_where(allwyn, None) == allwyn

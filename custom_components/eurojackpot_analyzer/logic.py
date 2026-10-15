@@ -24,6 +24,14 @@ def missing_dates(last_stored: str, last_known: str) -> list[date]:
     return list(rules.candidate_dates(start, date.fromisoformat(last_known)))
 
 
+def merge_where(classes: list[dict], official: dict | None) -> list[dict]:
+    """Add the official 'where the winners are' data (matched by tier) to classes that come from another source."""
+    if not official:
+        return classes
+    where = {c["tier"]: c["where"] for c in official.get("classes", []) if c.get("where")}
+    return [{**c, "where": where[c["tier"]]} if c["tier"] in where and "where" not in c else c for c in classes]
+
+
 def compute_stats(rows: list[list], period: str = "all") -> dict:
     """Statistics for a period: all | 1y | 3y | 5y | 10y | last_N (counts in the window, gaps on full history)."""
     draws = rows_to_draws(rows)

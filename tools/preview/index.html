@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EuroJackpot Analyzer cards - preview</title>
 <!-- Dev harness: loads the real card JS with fake Home Assistant states (fixture.js).
-     Options in the URL hash: #lang=en&theme=light&view=all|last|stats|ticket|panel&width=360&click=en -->
+     Serve the repo first:  python -m http.server 8770   (the card fetches countries.json and the flags)
+     Options in the URL hash: #lang=en|el|de&country=GR|DE&theme=light&view=all|last|stats|ticket|panel&width=360&menu=lang|country -->
 <style>
   body { margin: 0; padding: 24px; font-family: Roboto, "Segoe UI", sans-serif; font-size: 14px; }
   body.panel { padding: 0; min-height: 100vh; }
@@ -29,14 +30,17 @@
   }
   customElements.define("ha-card", HaCard);
 </script>
+<script>window.EJ_ASSETS = "/custom_components/eurojackpot_analyzer/www/assets";</script>
 <script src="fixture.js"></script>
 <script src="../../custom_components/eurojackpot_analyzer/www/eurojackpot-analyzer-card.js"></script>
 <script>
   const h = new URLSearchParams(location.hash.slice(1));
+  try { localStorage.clear(); } catch (e) {}          // the hash decides language/country, not a choice stored by an earlier preview
   document.body.className = h.get("theme") === "light" ? "light" : "dark";
   const view = h.get("view") || "all";
   const hass = {
     language: h.get("lang") || "el",
+    config: { country: h.get("country") || "GR" },
     states: window.FIXTURE,
     callService: async (domain, service, data) => { console.log("callService", domain, service, data); },
   };
@@ -49,7 +53,7 @@
     document.body.appendChild(panel);
     panel.narrow = h.get("narrow") === "1";
     panel.hass = hass;
-    if (h.get("click")) setTimeout(() => panel.shadowRoot.querySelector(`[data-lang="${h.get("click")}"]`).click(), 300);
+    if (h.get("menu")) setTimeout(() => panel.shadowRoot.querySelector(`[data-dd="${h.get("menu")}"] [data-btn]`).click(), 800);
     throw new Error("panel mode: done");     // stop here (the card grid below is not needed)
   }
   if (view !== "all") grid.classList.add("one");
