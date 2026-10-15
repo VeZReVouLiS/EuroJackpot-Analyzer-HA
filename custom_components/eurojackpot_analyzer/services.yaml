@@ -1,0 +1,40 @@
+generate_ticket:
+  fields:
+    columns:
+      required: false
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 12
+          mode: box
+    algorithm:
+      required: false
+      default: auto_ticket
+      selector:
+        select:
+          translation_key: algorithm
+          options:
+            - auto_ticket
+            - auto_column
+            - random
+            - hot
+            - cold
+            - overdue
+            - weighted
+            - balanced
+            - smart
+    period:
+      required: false
+      default: all
+      selector:
+        select:
+          translation_key: period
+          options:
+            - all
+            - 10y
+            - 5y
+            - 3y
+            - 1y
+            - last_100
+            - last_50

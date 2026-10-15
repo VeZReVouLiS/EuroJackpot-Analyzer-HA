@@ -1,0 +1,111 @@
+"""Set the integration up in a real (test) Home Assistant with the network layer mocked."""
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from unittest.mock import AsyncMock, patch
+
+import pytest
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ServiceValidationError
+from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+from custom_components.eurojackpot_analyzer.client import EuroJackpotClient, SourceError
+from custom_components.eurojackpot_analyzer.const import DOMAIN
+
+from .test_logic import ALLWYN_LAST
+from custom_components.eurojackpot_analyzer.parsing import parse_allwyn, parse_allwyn_active
+
+ACTIVE = parse_allwyn_active({"drawTime": 1792173600000, "drawId": 273,
+                              "prizeCategories": [{"id": 1, "jackpot": 10000000.0}]})
+
+
+def entry() -> MockConfigEntry:
+    return MockConfigEntry(domain=DOMAIN, unique_id=DOMAIN, data={}, title="EuroJackpot Analyzer")
+
+
+async def setup(hass: HomeAssistant, last=None, active=ACTIVE, fail=False):
+    last = last if last is not None else parse_allwyn(ALLWYN_LAST)
+    patches = [patch.object(EuroJackpotClient, "last_and_active",
+                            AsyncMock(side_effect=SourceError("HTTP 403 Forbidden")) if fail else AsyncMock(return_value=(last, active))),
+               patch.object(EuroJackpotClient, "allwyn_range", AsyncMock(return_value=[])),
+               patch.object(EuroJackpotClient, "official_day", AsyncMock(return_value=None))]
+    for p in patches:
+        p.start()
+    e = entry()
+    e.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(e.entry_id)
+    await hass.async_block_till_done()
+    for p in patches:
+        p.stop()
+    return e
+
+
+async def test_sensors(hass: HomeAssistant) -> None:
+    await setup(hass)
+    last = hass.states.get("sensor.eurojackpot_analyzer_last_draw")
+    assert last.state == "2026-10-13"
+    assert last.attributes["numbers"] == [11, 17, 20, 22, 35] and last.attributes["euro_numbers"] == [4, 8]
+    assert last.attributes["text"] == "11 17 20 22 35 + 4 8" and last.attributes["draw_number"] == 272
+    prizes = {p["tier"]: p for p in last.attributes["prizes"]}
+    assert prizes["4+2"]["winners_greece"] == 1 and prizes["4+2"]["winners_all_countries"] == 169
+    nxt = hass.states.get("sensor.eurojackpot_analyzer_next_draw")
+    assert datetime.fromisoformat(nxt.state) == datetime(2026, 10, 16, 18, 0, tzinfo=timezone.utc)
+    jackpot = hass.states.get("sensor.eurojackpot_analyzer_jackpot")
+    assert float(jackpot.state) == 10000000.0 and jackpot.attributes["unit_of_measurement"] == "€"
+    for key in ("overdue_numbers", "frequent_numbers", "rare_numbers"):
+        s = hass.states.get(f"sensor.eurojackpot_analyzer_{key}")
+        assert s.state not in ("unknown", "unavailable") and len(s.attributes["main"]) == 10
+        assert len(s.attributes["euro"]) == 3
+    assert hass.states.get("sensor.eurojackpot_analyzer_generated_ticket").state == "unknown"   # nothing generated yet
+
+
+async def test_generate_ticket_service(hass: HomeAssistant) -> None:
+    await setup(hass)
+    res = await hass.services.async_call(DOMAIN, "generate_ticket", {"columns": 7, "algorithm": "hot", "period": "5y"},
+                                         blocking=True, return_response=True)
+    assert res["column_count"] == 7 and res["total_cost"] == 17.5 and res["price_per_column"] == 2.5
+    for c in res["columns"]:
+        assert len(set(c["numbers"])) == 5 and all(1 <= n <= 50 for n in c["numbers"])
+        assert len(set(c["euro_numbers"])) == 2 and all(1 <= n <= 12 for n in c["euro_numbers"])
+        assert c["algorithm"] == "hot"
+    state = hass.states.get("sensor.eurojackpot_analyzer_generated_ticket")
+    assert state.state == "7" and state.attributes["total_cost"] == 17.5
+    auto = await hass.services.async_call(DOMAIN, "generate_ticket", {"columns": 12, "algorithm": "auto_column"},
+                                          blocking=True, return_response=True)
+    assert len({c["algorithm"] for c in auto["columns"]}) > 1
+
+
+async def test_service_validation(hass: HomeAssistant) -> None:
+    await setup(hass)
+    with pytest.raises(Exception):
+        await hass.services.async_call(DOMAIN, "generate_ticket", {"columns": 13}, blocking=True, return_response=True)
+
+
+async def test_new_draw_is_added_to_history(hass: HomeAssistant) -> None:
+    e = await setup(hass)
+    coord = e.runtime_data
+    before = coord.data["count"]
+    new = {**parse_allwyn(ALLWYN_LAST), "date": "2026-10-16", "main": [1, 2, 3, 4, 5], "euro": [1, 2]}
+    with patch.object(EuroJackpotClient, "last_and_active", AsyncMock(return_value=(new, ACTIVE))), \
+         patch.object(EuroJackpotClient, "allwyn_range", AsyncMock(return_value=[new])):
+        await coord.async_refresh()
+    assert coord.data["count"] == before + 1
+    assert hass.states.get("sensor.eurojackpot_analyzer_last_draw").state == "2026-10-16"
+
+
+async def test_works_offline_from_bundled_history(hass: HomeAssistant) -> None:
+    e = await setup(hass, fail=True)
+    assert e.state.value == "loaded"
+    assert hass.states.get("sensor.eurojackpot_analyzer_last_draw").state == "2026-10-13"      # from the bundled snapshot
+    assert hass.states.get("sensor.eurojackpot_analyzer_next_draw").state not in ("unknown", "unavailable")
+    assert hass.states.get("sensor.eurojackpot_analyzer_jackpot").state == "unknown"            # no jackpot without the API
+
+
+async def test_single_instance_and_options(hass: HomeAssistant) -> None:
+    e = await setup(hass)
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    assert result["type"] == "abort" and result["reason"] == "already_configured"
+    flow = await hass.config_entries.options.async_init(e.entry_id)
+    assert flow["type"] == "form"
+    done = await hass.config_entries.options.async_configure(flow["flow_id"], {"scan_interval": 60, "price_per_column": 2.0})
+    assert done["type"] == "create_entry" and e.options["price_per_column"] == 2.0
