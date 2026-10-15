@@ -1,7 +1,9 @@
 """Set the integration up in a real (test) Home Assistant with the network layer mocked."""
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -19,16 +21,19 @@ ACTIVE = parse_allwyn_active({"drawTime": 1792173600000, "drawId": 273,
                               "prizeCategories": [{"id": 1, "jackpot": 10000000.0}]})
 
 
+VERSION = json.loads((Path(__file__).parent.parent / "custom_components" / "eurojackpot_analyzer" / "manifest.json").read_text())["version"]
+
+
 def entry() -> MockConfigEntry:
     return MockConfigEntry(domain=DOMAIN, unique_id=DOMAIN, data={}, title="EuroJackpot Analyzer")
 
 
-async def setup(hass: HomeAssistant, last=None, active=ACTIVE, fail=False):
+async def setup(hass: HomeAssistant, last=None, active=ACTIVE, fail=False, official=None):
     last = last if last is not None else parse_allwyn(ALLWYN_LAST)
     patches = [patch.object(EuroJackpotClient, "last_and_active",
                             AsyncMock(side_effect=SourceError("HTTP 403 Forbidden")) if fail else AsyncMock(return_value=(last, active))),
                patch.object(EuroJackpotClient, "allwyn_range", AsyncMock(return_value=[])),
-               patch.object(EuroJackpotClient, "official_day", AsyncMock(return_value=None))]
+               patch.object(EuroJackpotClient, "official_day", AsyncMock(return_value=official))]
     for p in patches:
         p.start()
     e = entry()
@@ -59,6 +64,17 @@ async def test_sensors(hass: HomeAssistant) -> None:
     assert hass.states.get("sensor.eurojackpot_analyzer_generated_ticket").state == "unknown"   # nothing generated yet
 
 
+async def test_where_won_and_sales_from_the_official_source(hass: HomeAssistant) -> None:
+    official = {"classes": [{"tier": "5+2", "where": [{"alpha3": "DEU", "code": "DE", "winners": 1, "region": "Bayern"}]}],
+                "stake_all": 75205218.0}
+    await setup(hass, official=official)
+    last = hass.states.get("sensor.eurojackpot_analyzer_last_draw")
+    prizes = {p["tier"]: p for p in last.attributes["prizes"]}
+    assert prizes["5+2"]["where_won"] == [{"alpha3": "DEU", "code": "DE", "winners": 1, "region": "Bayern"}]
+    assert "where_won" not in prizes["4+2"] and last.attributes["total_sales"] == 75205218.0
+    assert prizes["4+2"]["winners_greece"] == 1          # the Allwyn (Greek) data is kept
+
+
 async def test_generate_ticket_service(hass: HomeAssistant) -> None:
     await setup(hass)
     res = await hass.services.async_call(DOMAIN, "generate_ticket", {"columns": 7, "algorithm": "hot", "period": "5y"},
@@ -87,7 +103,7 @@ async def test_new_draw_is_added_to_history(hass: HomeAssistant) -> None:
     before = coord.data["count"]
     new = {**parse_allwyn(ALLWYN_LAST), "date": "2026-10-16", "main": [1, 2, 3, 4, 5], "euro": [1, 2]}
     with patch.object(EuroJackpotClient, "last_and_active", AsyncMock(return_value=(new, ACTIVE))), \
-         patch.object(EuroJackpotClient, "allwyn_range", AsyncMock(return_value=[new])):
+         patch.object(EuroJackpotClient, "allwyn_range", AsyncMock(return_value=[new])),          patch.object(EuroJackpotClient, "official_day", AsyncMock(return_value=None)):
         await coord.async_refresh()
     assert coord.data["count"] == before + 1
     assert hass.states.get("sensor.eurojackpot_analyzer_last_draw").state == "2026-10-16"
@@ -135,12 +151,12 @@ async def test_panel_cards_and_module_are_registered(hass: HomeAssistant) -> Non
     cfg = hass.http.async_register_static_paths.call_args.args[0][0]
     assert hass.http.async_register_static_paths.call_count == 1
     assert cfg.url_path == "/eurojackpot_analyzer/eurojackpot-analyzer-card.js" and Path(cfg.path).exists()
-    assert add_js.call_count == 1 and add_js.call_args.args[1].startswith(cfg.url_path + "?v=0.3.2-")
+    assert add_js.call_count == 1 and add_js.call_args.args[1].startswith(cfg.url_path + f"?v={VERSION}-")
     assert reg_panel.call_count == 1
     kw = reg_panel.call_args.kwargs
     assert kw["webcomponent_name"] == "eurojackpot-analyzer-panel" and kw["frontend_url_path"] == "eurojackpot"
     assert kw["sidebar_title"] == "EuroJackpot Analyzer" and kw["require_admin"] is False
-    assert kw["module_url"].startswith(cfg.url_path + "?v=0.3.2-")          # cache-busting token
+    assert kw["module_url"].startswith(cfg.url_path + f"?v={VERSION}-")          # cache-busting token
 
 
 async def test_panel_is_removed_with_the_last_entry(hass: HomeAssistant) -> None:

@@ -80,7 +80,7 @@ class EuroJackpotCoordinator(DataUpdateCoordinator[dict]):
         if self._official_for is None or self._official_for[0] != last["date"] or self._official_for[1] is None:
             try:
                 official = await self.client.official_day(date.fromisoformat(last["date"]))
-            except SourceError as err:
+            except Exception as err:        # best effort: never let the extra data break the update
                 _LOGGER.debug("Official source unavailable for the where-won data: %s", err)
                 official = None
             self._official_for = (last["date"], official)
