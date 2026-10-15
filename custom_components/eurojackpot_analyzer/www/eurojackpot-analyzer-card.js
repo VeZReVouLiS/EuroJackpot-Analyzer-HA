@@ -4,7 +4,7 @@
  *   custom:eurojackpot-analyzer-stats-card       overdue map of the 50 numbers + rankings
  *   custom:eurojackpot-analyzer-ticket-card      ticket generator
  */
-const EJ_VERSION = "0.2.0";
+const EJ_VERSION = "0.2.1";
 const DOMAIN = "eurojackpot_analyzer";
 const ID = {
   last: `sensor.${DOMAIN}_last_draw`,
@@ -147,7 +147,8 @@ class EJBase extends HTMLElement {
   }
   getCardSize() { return 4; }
   getGridOptions() { return { columns: 12, min_columns: 6 }; }
-  get lang() { return ((this._hass && this._hass.language) || "en").toLowerCase().startsWith("el") ? "el" : "en"; }
+  // language: the card option `language: el|en` wins, otherwise the language of the Home Assistant user
+  get lang() { return (this._cfg.language || (this._hass && this._hass.language) || "en").toLowerCase().startsWith("el") ? "el" : "en"; }
   get tr() { return TEXT[this.lang]; }
   get locale() { return this.lang === "el" ? "el-GR" : "en-GB"; }
   st(id) { return this._hass && this._hass.states[id]; }

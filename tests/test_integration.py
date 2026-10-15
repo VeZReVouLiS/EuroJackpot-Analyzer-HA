@@ -129,7 +129,6 @@ async def test_cards_are_served_and_loaded_automatically(hass: HomeAssistant) ->
     assert CARD_URL == "/eurojackpot_analyzer/eurojackpot-analyzer-card.js"
     hass.http = MagicMock()
     hass.http.async_register_static_paths = AsyncMock()
-    hass.config.components.add("frontend")
     with patch("homeassistant.components.frontend.add_extra_js_url") as add_js:
         await _async_register_cards(hass)
     cfg = hass.http.async_register_static_paths.call_args.args[0][0]

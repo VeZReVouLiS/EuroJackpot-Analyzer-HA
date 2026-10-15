@@ -46,7 +46,7 @@
   for (const [k, tag] of Object.entries(tags)) {
     if (view !== "all" && view !== k) continue;
     const el = document.createElement(tag);
-    el.setConfig(k === "ticket" ? { columns: 5, algorithm: "auto_column" } : {});
+    el.setConfig(k === "ticket" ? { columns: 5, algorithm: "auto_column" } : {});   // add language: "el" here to force a language
     el.hass = hass;
     grid.appendChild(el);
   }

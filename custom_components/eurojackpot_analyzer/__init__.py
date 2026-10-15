@@ -11,6 +11,7 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_time_change
+from homeassistant.setup import async_when_setup
 
 from .client import EuroJackpotClient
 from .const import ALGORITHMS, AUTO_COLUMN, AUTO_TICKET, DOMAIN, MAX_COLUMNS, PERIODS
@@ -42,13 +43,15 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
     hass.services.async_register(DOMAIN, SERVICE_GENERATE_TICKET, handle_generate, schema=GENERATE_SCHEMA,
                                  supports_response=SupportsResponse.OPTIONAL)
-    await _async_register_cards(hass)
+    async_when_setup(hass, "frontend", _async_register_cards)
     return True
 
 
-async def _async_register_cards(hass: HomeAssistant) -> None:
-    """Serve the Lovelace cards and load them on every dashboard, so users need no resource setup."""
-    if getattr(hass, "http", None) is None or "frontend" not in hass.config.components:
+async def _async_register_cards(hass: HomeAssistant, _component: str = "frontend") -> None:
+    """Serve the Lovelace cards and load them on every dashboard, so users need no resource setup.
+
+    Called once the frontend is set up (async_when_setup), whatever the start-up order is."""
+    if getattr(hass, "http", None) is None:
         return                                   # headless / test environments
     from homeassistant.components.frontend import add_extra_js_url
     from homeassistant.components.http import StaticPathConfig

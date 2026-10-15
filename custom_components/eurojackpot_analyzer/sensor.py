@@ -6,8 +6,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
-from homeassistant.components.sensor import (SensorDeviceClass, SensorEntity, SensorEntityDescription,
-                                             SensorStateClass)
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorEntityDescription
 from homeassistant.const import CURRENCY_EURO
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
@@ -54,7 +53,7 @@ SENSORS: tuple[EuroJackpotSensorDescription, ...] = (
         attrs_fn=lambda d: {"draw_number": d["next"].get("draw_number")}),
     EuroJackpotSensorDescription(
         key="jackpot", translation_key="jackpot", device_class=SensorDeviceClass.MONETARY,
-        native_unit_of_measurement=CURRENCY_EURO, state_class=SensorStateClass.MEASUREMENT, suggested_display_precision=0,
+        native_unit_of_measurement=CURRENCY_EURO, suggested_display_precision=0,
         icon="mdi:cash-multiple", value_fn=lambda d: d["next"].get("jackpot"),
         attrs_fn=lambda d: {"next_draw": d["next"]["draw_time"].isoformat()}),
     EuroJackpotSensorDescription(
