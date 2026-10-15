@@ -12,7 +12,7 @@
  * eurojackpot.com style); language (el / en / de) decides the texts. Both are chosen in the panel, remembered
  * in this browser, and can be fixed on a card with `country:` / `language:`.
  */
-const EJ_VERSION = "0.4.1";
+const EJ_VERSION = "0.4.2";
 const DOMAIN = "eurojackpot_analyzer";
 const ASSETS = window.EJ_ASSETS || `/${DOMAIN}/assets`;     // EJ_ASSETS: only the offline preview sets it
 const ID = {
@@ -132,6 +132,10 @@ ha-card { position: relative; overflow: hidden; color: var(--primary-text-color)
   background: linear-gradient(135deg, #2a3a55, #0d1328); border: 1.5px solid #5b6b88; box-shadow: 0 .4em 1.2em rgba(56,150,255,.3); }
 .logo span { font-size: 1.5em; line-height: 1; }
 .logo img { width: 84%; height: auto; display: block; }
+.logo.big { width: 3.7em; height: 3.7em; border-radius: 1em; }
+.logo svg { width: 84%; height: auto; display: block; }
+.when { font-size: 1.5em; line-height: 1.25; color: var(--secondary-text-color); }
+.when b { color: var(--primary-text-color); font-weight: 800; }
 .title b { display: block; font-size: 1.2em; line-height: 1.2; }
 .sub { color: var(--secondary-text-color); font-size: .88em; }
 .hero { background: linear-gradient(135deg, rgba(124,92,255,.22), rgba(34,211,238,.10)); border-bottom: 1px solid var(--divider-color); }
@@ -207,6 +211,16 @@ select { font: inherit; font-size: 1em; color: inherit; background: var(--second
 `;
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+/* a lottery drum with balls: the icon of the draw card */
+const DRAW_ICON = `<svg viewBox="0 0 64 64" aria-hidden="true">
+  <rect x="5" y="36" width="7" height="22" rx="1.5" fill="#94a3b8"/><rect x="52" y="36" width="7" height="22" rx="1.5" fill="#94a3b8"/>
+  <path d="M8 31H56" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="5" cy="31" rx="2.6" ry="10" fill="none" stroke="#cbd5e1" stroke-width="1.6"/>
+  <rect x="28.5" y="4.5" width="7" height="6" rx="1" fill="#cbd5e1"/>
+  <circle cx="32" cy="31" r="20" fill="rgba(255,255,255,.07)" stroke="#e2e8f0" stroke-width="2"/>
+  <g fill="none" stroke="#e2e8f0" stroke-width="1.5"><ellipse cx="32" cy="31" rx="8" ry="20"/><ellipse cx="32" cy="31" rx="15" ry="20"/><ellipse cx="32" cy="31" rx="20" ry="6"/></g>
+  <circle cx="25" cy="37" r="4.2" fill="#6366f1"/><circle cx="35" cy="39" r="4.2" fill="#f59e0b"/><circle cx="31" cy="28" r="4.2" fill="#6366f1"/><circle cx="40" cy="30" r="4.2" fill="#f59e0b"/><circle cx="23" cy="27" r="3.6" fill="#f59e0b"/>
+</svg>`;
 const logoHtml = () => `<div class="logo"><img src="${ASSETS}/logo.svg" alt=""></div>`;
 
 class EJBase extends HTMLElement {
@@ -342,8 +356,8 @@ class EJLastDrawCard extends EJBase {
     const jackpot = jp && !isNaN(parseFloat(jp.state)) ? parseFloat(jp.state) : null;
     const head = `
       <div class="head">
-        <div class="title">${logoHtml()}
-          <div><b>EuroJackpot</b><span class="sub">${t.last} · ${esc(this.fmtDate(last.state))}${a.draw_number ? ` · #${esc(a.draw_number)}` : ""}</span></div></div>
+        <div class="title"><div class="logo big">${DRAW_ICON}</div>
+          <div class="when"><b>${t.last}</b> · ${esc(this.fmtDate(last.state))}${a.draw_number ? ` · #${esc(a.draw_number)}` : ""}</div></div>
       </div>
       <div class="balls nowrap" style="margin-top:1.1em">
         ${a.numbers.map((n) => this.ball(n, "lg")).join("")}<span class="sep"></span>${a.euro_numbers.map((n) => this.ball(n, "euro lg")).join("")}
