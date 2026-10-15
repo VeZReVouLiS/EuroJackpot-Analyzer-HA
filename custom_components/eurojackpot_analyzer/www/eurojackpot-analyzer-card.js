@@ -12,7 +12,7 @@
  * eurojackpot.com style); language (el / en / de) decides the texts. Both are chosen in the panel, remembered
  * in this browser, and can be fixed on a card with `country:` / `language:`.
  */
-const EJ_VERSION = "0.4.0";
+const EJ_VERSION = "0.4.1";
 const DOMAIN = "eurojackpot_analyzer";
 const ASSETS = window.EJ_ASSETS || `/${DOMAIN}/assets`;     // EJ_ASSETS: only the offline preview sets it
 const ID = {
@@ -60,7 +60,7 @@ const TEXT = {
     perColumn: "ανά στήλη", column: "Στήλη", total: "Σύνολο δελτίου",
     empty: "Διάλεξε στήλες και αλγόριθμο και πάτα «Δημιούργησε δελτίο».",
     generating: "Δημιουργία…", disclaimer: "Η κλήρωση είναι τυχαία· τα στατιστικά δεν αυξάνουν τις πιθανότητες. Παίξε υπεύθυνα (18+).",
-    refresh: "Ανανέωση", language: "Γλώσσα", country: "Χώρα", panelSub: "Κληρώσεις · στατιστικά · δελτία",
+    refresh: "Ανανέωση", language: "Γλώσσα", country: "Χώρα", panelSub: "Κληρώσεις · Στατιστικά · Δελτία",
     m: (n) => `${n} ${n === 1 ? "αριθμός" : "αριθμοί"}`, e: (n) => `${n} Euro ${n === 1 ? "αριθμός" : "αριθμοί"}`,
     algos: {
       auto_ticket: "Αυτόματος – ένας ανά δελτίο", auto_column: "Αυτόματος – ένας ανά στήλη", random: "Καθαρά τυχαίος",
@@ -85,7 +85,7 @@ const TEXT = {
     perColumn: "per column", column: "Column", total: "Ticket total",
     empty: "Pick the columns and an algorithm, then press “Generate ticket”.",
     generating: "Generating…", disclaimer: "Draws are random; statistics do not improve your odds. Play responsibly (18+).",
-    refresh: "Refresh", language: "Language", country: "Country", panelSub: "Draws · statistics · tickets",
+    refresh: "Refresh", language: "Language", country: "Country", panelSub: "Draws · Statistics · Tickets",
     m: (n) => `${n} ${n === 1 ? "number" : "numbers"}`, e: (n) => `${n} Euro ${n === 1 ? "number" : "numbers"}`,
     algos: {
       auto_ticket: "Automatic – one per ticket", auto_column: "Automatic – one per column", random: "Pure random",

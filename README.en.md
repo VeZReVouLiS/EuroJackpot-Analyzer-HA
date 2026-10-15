@@ -79,6 +79,8 @@ Names are shown in Greek, English or German depending on the language of HA (ent
 
 ![The entities of the device](docs/images/05-device-en.png)
 
+(The entity names follow the system language of Home Assistant, which is Greek on this installation.)
+
 ## Service `eurojackpot_analyzer.generate_ticket`
 | Field | Values | Default |
 |---|---|---|
