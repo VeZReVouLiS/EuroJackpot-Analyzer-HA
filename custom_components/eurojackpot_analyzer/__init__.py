@@ -1,7 +1,5 @@
-"""EuroJackpot: last draw, next draw and jackpot, number statistics and a ticket generator."""
+"""EuroJackpot Analyzer: last draw, next draw and jackpot, number statistics, ticket generator, sidebar panel."""
 from __future__ import annotations
-
-from pathlib import Path
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
@@ -16,10 +14,9 @@ from homeassistant.setup import async_when_setup
 from .client import EuroJackpotClient
 from .const import ALGORITHMS, AUTO_COLUMN, AUTO_TICKET, DOMAIN, MAX_COLUMNS, PERIODS
 from .coordinator import EuroJackpotCoordinator
+from .panel import CARD_URL, async_register_ui, async_unregister_ui  # noqa: F401  (CARD_URL re-exported)
 
 PLATFORMS = [Platform.SENSOR]
-CARD_FILE = "eurojackpot-analyzer-card.js"
-CARD_URL = f"/{DOMAIN}/{CARD_FILE}"
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 SERVICE_GENERATE_TICKET = "generate_ticket"
@@ -36,31 +33,14 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     async def handle_generate(call: ServiceCall) -> dict:
         entries = hass.config_entries.async_loaded_entries(DOMAIN)
         if not entries:
-            raise ServiceValidationError("The EuroJackpot integration is not set up")
+            raise ServiceValidationError("The EuroJackpot Analyzer integration is not set up")
         coordinator: EuroJackpotCoordinator = entries[0].runtime_data
         return await coordinator.async_generate_ticket(call.data["columns"], call.data["algorithm"],
                                                        call.data["period"])
 
     hass.services.async_register(DOMAIN, SERVICE_GENERATE_TICKET, handle_generate, schema=GENERATE_SCHEMA,
                                  supports_response=SupportsResponse.OPTIONAL)
-    async_when_setup(hass, "frontend", _async_register_cards)
     return True
-
-
-async def _async_register_cards(hass: HomeAssistant, _component: str = "frontend") -> None:
-    """Serve the Lovelace cards and load them on every dashboard, so users need no resource setup.
-
-    Called once the frontend is set up (async_when_setup), whatever the start-up order is."""
-    if getattr(hass, "http", None) is None:
-        return                                   # headless / test environments
-    from homeassistant.components.frontend import add_extra_js_url
-    from homeassistant.components.http import StaticPathConfig
-    from homeassistant.loader import async_get_integration
-
-    js = Path(__file__).parent / "www" / CARD_FILE
-    await hass.http.async_register_static_paths([StaticPathConfig(CARD_URL, str(js), cache_headers=False)])
-    version = (await async_get_integration(hass, DOMAIN)).version
-    add_extra_js_url(hass, f"{CARD_URL}?v={version}")
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: EuroJackpotConfigEntry) -> bool:
@@ -75,6 +55,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: EuroJackpotConfigEntry) 
 
     entry.async_on_unload(async_track_time_change(hass, _refresh, hour=[21, 22, 23], minute=[20, 50]))
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))
+    # the sidebar panel + cards, as soon as the frontend is up (whatever the start-up order is)
+    async_when_setup(hass, "frontend", async_register_ui)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
@@ -84,4 +66,7 @@ async def _async_options_updated(hass: HomeAssistant, entry: EuroJackpotConfigEn
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: EuroJackpotConfigEntry) -> bool:
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unloaded and not [e for e in hass.config_entries.async_loaded_entries(DOMAIN) if e.entry_id != entry.entry_id]:
+        async_unregister_ui(hass)
+    return unloaded

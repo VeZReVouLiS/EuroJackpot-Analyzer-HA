@@ -120,26 +120,49 @@ async def test_full_number_table_for_the_heat_map(hass: HomeAssistant) -> None:
     assert all(set(x) == {"number", "count", "percent", "draws_since"} for x in all_["main"])
     assert s.attributes["draws_analysed"] == 998
 
-
-async def test_cards_are_served_and_loaded_automatically(hass: HomeAssistant) -> None:
+async def test_panel_cards_and_module_are_registered(hass: HomeAssistant) -> None:
+    from pathlib import Path
     from unittest.mock import MagicMock
 
-    from custom_components.eurojackpot_analyzer import CARD_URL, _async_register_cards
+    from custom_components.eurojackpot_analyzer import panel
 
-    assert CARD_URL == "/eurojackpot_analyzer/eurojackpot-analyzer-card.js"
     hass.http = MagicMock()
     hass.http.async_register_static_paths = AsyncMock()
-    with patch("homeassistant.components.frontend.add_extra_js_url") as add_js:
-        await _async_register_cards(hass)
+    with patch("homeassistant.components.frontend.add_extra_js_url") as add_js, \
+         patch("homeassistant.components.panel_custom.async_register_panel", new_callable=AsyncMock) as reg_panel:
+        await panel.async_register_ui(hass)
+        await panel.async_register_ui(hass)                                 # idempotent: nothing is registered twice
     cfg = hass.http.async_register_static_paths.call_args.args[0][0]
-    assert cfg.url_path == CARD_URL and cfg.path.endswith("eurojackpot-analyzer-card.js")
-    from pathlib import Path
-    assert Path(cfg.path).exists()                                          # the JS file ships with the integration
-    assert add_js.call_args.args[1].startswith(CARD_URL + "?v=")
+    assert hass.http.async_register_static_paths.call_count == 1
+    assert cfg.url_path == "/eurojackpot_analyzer/eurojackpot-analyzer-card.js" and Path(cfg.path).exists()
+    assert add_js.call_count == 1 and add_js.call_args.args[1].startswith(cfg.url_path + "?v=0.3.0-")
+    assert reg_panel.call_count == 1
+    kw = reg_panel.call_args.kwargs
+    assert kw["webcomponent_name"] == "eurojackpot-analyzer-panel" and kw["frontend_url_path"] == "eurojackpot"
+    assert kw["sidebar_title"] == "EuroJackpot Analyzer" and kw["require_admin"] is False
+    assert kw["module_url"].startswith(cfg.url_path + "?v=0.3.0-")          # cache-busting token
 
 
-async def test_cards_are_skipped_without_a_web_server(hass: HomeAssistant) -> None:
-    from custom_components.eurojackpot_analyzer import _async_register_cards
+async def test_panel_is_removed_with_the_last_entry(hass: HomeAssistant) -> None:
+    from unittest.mock import MagicMock
+
+    from custom_components.eurojackpot_analyzer import panel
+
+    hass.http = MagicMock()
+    hass.http.async_register_static_paths = AsyncMock()
+    with patch("homeassistant.components.frontend.add_extra_js_url"), \
+         patch("homeassistant.components.panel_custom.async_register_panel", new_callable=AsyncMock):
+        await panel.async_register_ui(hass)
+    with patch("homeassistant.components.frontend.async_remove_panel") as rm, \
+         patch("homeassistant.components.frontend.remove_extra_js_url") as rm_js:
+        panel.async_unregister_ui(hass)
+        panel.async_unregister_ui(hass)                                     # a second call does nothing
+    rm.assert_called_once_with(hass, "eurojackpot")
+    assert rm_js.call_count == 1
+
+
+async def test_ui_is_skipped_without_a_web_server(hass: HomeAssistant) -> None:
+    from custom_components.eurojackpot_analyzer import panel
 
     hass.http = None
-    await _async_register_cards(hass)                                       # must not raise
+    await panel.async_register_ui(hass)                                     # must not raise

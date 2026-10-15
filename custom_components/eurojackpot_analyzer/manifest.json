@@ -1,7 +1,7 @@
 {
   "domain": "eurojackpot_analyzer",
   "name": "EuroJackpot Analyzer",
-  "after_dependencies": ["frontend", "http"],
+  "after_dependencies": ["frontend", "http", "panel_custom"],
   "codeowners": ["@VeZReVouLiS"],
   "config_flow": true,
   "documentation": "https://github.com/VeZReVouLiS/EuroJackpot-Analyzer-HA",
@@ -9,5 +9,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/VeZReVouLiS/EuroJackpot-Analyzer-HA/issues",
   "requirements": [],
-  "version": "0.2.1"
+  "version": "0.3.0"
 }
