@@ -8,7 +8,7 @@
  * scale the whole UI just by changing its font size, and the cards use container queries so they adapt
  * to the width of whatever holds them.
  */
-const EJ_VERSION = "0.3.0";
+const EJ_VERSION = "0.3.1";
 const DOMAIN = "eurojackpot_analyzer";
 const ID = {
   last: `sensor.${DOMAIN}_last_draw`,
@@ -330,7 +330,7 @@ const PANEL_STYLE = `
   background: var(--primary-background-color);
   /* the whole UI scales with the window: every size inside is in em */
   font-size: clamp(15px, calc(0.42vw + 11px), 27px); }
-.page { padding: clamp(10px, 1.6vw, 40px); max-width: 2400px; margin: 0 auto; }
+.page { padding: clamp(12px, 1.2vw, 32px); max-width: none; margin: 0; }
 .bar { display: flex; align-items: center; justify-content: space-between; gap: 1em; flex-wrap: wrap; margin-bottom: 1.2em; }
 .brand { display: flex; align-items: center; gap: .9em; min-width: 0; }
 .brand .logo { display: grid; place-items: center; width: 3.3em; height: 3.3em; border-radius: 1em; flex: none;

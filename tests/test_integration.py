@@ -135,12 +135,12 @@ async def test_panel_cards_and_module_are_registered(hass: HomeAssistant) -> Non
     cfg = hass.http.async_register_static_paths.call_args.args[0][0]
     assert hass.http.async_register_static_paths.call_count == 1
     assert cfg.url_path == "/eurojackpot_analyzer/eurojackpot-analyzer-card.js" and Path(cfg.path).exists()
-    assert add_js.call_count == 1 and add_js.call_args.args[1].startswith(cfg.url_path + "?v=0.3.0-")
+    assert add_js.call_count == 1 and add_js.call_args.args[1].startswith(cfg.url_path + "?v=0.3.1-")
     assert reg_panel.call_count == 1
     kw = reg_panel.call_args.kwargs
     assert kw["webcomponent_name"] == "eurojackpot-analyzer-panel" and kw["frontend_url_path"] == "eurojackpot"
     assert kw["sidebar_title"] == "EuroJackpot Analyzer" and kw["require_admin"] is False
-    assert kw["module_url"].startswith(cfg.url_path + "?v=0.3.0-")          # cache-busting token
+    assert kw["module_url"].startswith(cfg.url_path + "?v=0.3.1-")          # cache-busting token
 
 
 async def test_panel_is_removed_with_the_last_entry(hass: HomeAssistant) -> None:
