@@ -7,15 +7,42 @@ from .core import rules, stats
 
 
 def rows_to_draws(rows: list[list]) -> list[dict]:
-    return [{"date": r[0], "main": r[1], "euro": r[2]} for r in rows]
+    """History rows [[date, main, euro, {tier: prize}?], ...] -> draw dicts (with `details` when the prizes are known)."""
+    out = []
+    for r in rows:
+        d = {"date": r[0], "main": r[1], "euro": r[2]}
+        if len(r) > 3 and r[3]:
+            d["details"] = {"classes": [{"tier": t, "prize": p} for t, p in r[3].items()]}
+        out.append(d)
+    return out
+
+
+def prizes_of(draw: dict) -> dict[str, float]:
+    """{tier: prize per winner} of a draw dict that carries `classes` (the paying classes only)."""
+    return {c["tier"]: c["prize"] for c in draw.get("classes") or [] if c.get("prize", 0) > 0}
 
 
 def merge_draws(rows: list[list], new: list[dict]) -> list[list]:
-    """Insert/replace draws (dicts with date/main/euro) in the sorted history rows [[date, main, euro], ...]."""
+    """Insert/replace draws (dicts with date/main/euro) in the sorted history rows [[date, main, euro, prizes?], ...]."""
     by_date = {r[0]: r for r in rows}
     for d in new:
-        by_date[d["date"]] = [d["date"], sorted(d["main"]), sorted(d["euro"])]
+        row = [d["date"], sorted(d["main"]), sorted(d["euro"])]
+        prizes = prizes_of(d) or (by_date[d["date"]][3] if d["date"] in by_date and len(by_date[d["date"]]) > 3 else None)
+        if prizes:
+            row.append(prizes)
+        by_date[d["date"]] = row
     return [by_date[k] for k in sorted(by_date)]
+
+
+def add_prizes(rows: list[list], seed_rows: list[list]) -> bool:
+    """Give rows saved by an older version the prizes of the bundled history (in place). True when something changed."""
+    prizes = {r[0]: r[3] for r in seed_rows if len(r) > 3}
+    changed = False
+    for r in rows:
+        if len(r) == 3 and r[0] in prizes:
+            r.append(prizes[r[0]])
+            changed = True
+    return changed
 
 
 def missing_dates(last_stored: str, last_known: str) -> list[date]:

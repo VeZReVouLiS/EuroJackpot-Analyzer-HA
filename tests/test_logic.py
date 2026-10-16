@@ -1,3 +1,5 @@
+import pytest
+
 from datetime import date, datetime, timezone
 
 from custom_components.eurojackpot_analyzer import logic
@@ -101,3 +103,52 @@ def test_official_where_won_is_parsed_and_merged():
     merged = logic.merge_where(allwyn, d)
     assert merged[0]["where"][0]["alpha3"] == "DEU" and "where" not in merged[1]
     assert logic.merge_where(allwyn, None) == allwyn
+
+
+def test_prizes_travel_with_the_history_rows():
+    from custom_components.eurojackpot_analyzer.tickets import draw_for
+    new = [{"date": "2026-10-16", "main": [1, 2, 3, 4, 5], "euro": [1, 2],
+            "classes": [{"tier": "4+2", "prize": 1780.0}, {"tier": "3+0", "prize": 0}]}]
+    out = logic.merge_draws(ROWS, new)
+    assert out[-1] == ["2026-10-16", [1, 2, 3, 4, 5], [1, 2], {"4+2": 1780.0}]
+    again = logic.merge_draws(out, [{"date": "2026-10-16", "main": [1, 2, 3, 4, 5], "euro": [1, 2]}])
+    assert again[-1][3] == {"4+2": 1780.0}                      # a refresh without a prize table keeps the known one
+    assert logic.rows_to_draws(out)[-1]["details"]["classes"] == [{"tier": "4+2", "prize": 1780.0}]
+    assert "details" not in logic.rows_to_draws(out)[0]
+    assert draw_for(out, "2026-10-16")["details"]["classes"][0]["prize"] == 1780.0 and draw_for(out, "2000-01-01") is None
+    old = [["2026-10-02", [1, 2, 3, 4, 5], [1, 2]]]
+    assert logic.add_prizes(old, [["2026-10-02", [1, 2, 3, 4, 5], [1, 2], {"5+2": 1.0}]]) and old[0][3] == {"5+2": 1.0}
+    assert not logic.add_prizes(old, [["2026-10-02", [1, 2, 3, 4, 5], [1, 2], {"5+2": 1.0}]])
+
+
+def test_parse_columns():
+    from custom_components.eurojackpot_analyzer.tickets import parse_columns
+    assert parse_columns("5 12 23 34 45 + 3 7; 1,2,3,4,5 + 1 2") == [
+        {"main": [5, 12, 23, 34, 45], "euro": [3, 7]}, {"main": [1, 2, 3, 4, 5], "euro": [1, 2]}]
+    for bad in ["", "1 2 3 4 + 1 2", "1 2 3 4 51 + 1 2", "1 2 3 4 5 + 1 13", "1 2 3 4 5 + 1 1", "a b c d e + 1 2", "1 2 3 4 4 + 1 2"]:
+        with pytest.raises(ValueError):
+            parse_columns(bad)
+    with pytest.raises(ValueError):
+        parse_columns(";".join(["1 2 3 4 5 + 1 2"] * 13))
+
+
+def test_pending_results_and_messages():
+    from custom_components.eurojackpot_analyzer import tickets as tk
+    rows = [["2026-10-13", [11, 17, 20, 22, 35], [4, 8], {"4+2": 1780.0}]]
+    win = {"uid": "a", "target_date": "2026-10-13", "played": True,
+           "columns": [{"main": [11, 17, 20, 22, 1], "euro": [4, 8]}, {"main": [1, 2, 3, 4, 5], "euro": [1, 2]}]}
+    lose = {"uid": "b", "target_date": "2026-10-13", "played": True, "columns": [{"main": [1, 2, 3, 4, 5], "euro": [1, 2]}]}
+    items = tk.pending_results([win, lose, {**win, "uid": "c", "played": False}, {**win, "uid": "d", "target_date": "2026-10-20"}], rows, set())
+    assert [i["uid"] for i in items] == ["a", "b"]             # not played / not drawn yet are left out
+    assert items[0]["result"]["total_prize"] == 1780.0 and items[0]["result"]["winning_columns"] == 1
+    assert "1 of 2 columns won" in tk.result_message("en", items[0]) and "1.780,00" not in tk.result_message("en", items[0])
+    assert tk.result_message("en", items[1]) == "Ticket for 2026-10-13: no winning column"
+    assert tk.pending_results([win], rows, {items[0]["key"]}) == []
+    assert tk.text("el", "new_draw", date="x", numbers="y") == "Κλήρωση x: y" and tk.text("fr", "title") == "EuroJackpot"
+
+
+def test_jackpot_due():
+    from custom_components.eurojackpot_analyzer.tickets import jackpot_due
+    assert jackpot_due(30e6, 25, "2026-10-16T18:00", None)
+    assert not jackpot_due(30e6, 25, "2026-10-16T18:00", "2026-10-16T18:00")      # once per draw
+    assert not jackpot_due(20e6, 25, "k", None) and not jackpot_due(30e6, 0, "k", None) and not jackpot_due(None, 25, "k", None)

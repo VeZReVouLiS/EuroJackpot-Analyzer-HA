@@ -16,20 +16,41 @@
         "title": "EuroJackpot Analyzer options",
         "data": {
           "scan_interval": "Refresh interval (minutes)",
-          "price_per_column": "Price per column (€)"
-        }
+          "price_per_column": "Price per column (€)",
+          "notify_service": "Notification service (e.g. notify.mobile_app_my_phone, empty = none)",
+          "jackpot_threshold": "Jackpot alert from (million €, 0 = off)",
+          "github_token": "GitHub token to read your synced tickets (optional)"
+        },
+        "description": "Alerts for new draws, a high jackpot and the results of your tickets. The token (permission: gist) is the same one you use in the app for the ticket sync."
       }
     }
   },
   "entity": {
     "sensor": {
-      "last_draw": { "name": "Last draw" },
-      "next_draw": { "name": "Next draw" },
-      "jackpot": { "name": "Jackpot" },
-      "overdue_numbers": { "name": "Most overdue numbers" },
-      "frequent_numbers": { "name": "Most frequent numbers" },
-      "rare_numbers": { "name": "Least frequent numbers" },
-      "generated_ticket": { "name": "Generated ticket" }
+      "last_draw": {
+        "name": "Last draw"
+      },
+      "next_draw": {
+        "name": "Next draw"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Most overdue numbers"
+      },
+      "frequent_numbers": {
+        "name": "Most frequent numbers"
+      },
+      "rare_numbers": {
+        "name": "Least frequent numbers"
+      },
+      "generated_ticket": {
+        "name": "Generated ticket"
+      },
+      "my_tickets": {
+        "name": "My tickets"
+      }
     }
   },
   "services": {
@@ -37,10 +58,45 @@
       "name": "Generate ticket",
       "description": "Generates a ticket of 1 to 12 columns (5 numbers + 2 Euro numbers each) using the number statistics, and returns the columns and the total cost.",
       "fields": {
-        "columns": { "name": "Columns", "description": "Number of columns (1-12)." },
-        "algorithm": { "name": "Algorithm", "description": "How the numbers are chosen. The automatic options pick a random algorithm per ticket or per column." },
-        "period": { "name": "Period", "description": "The part of the history the statistics are based on." }
+        "columns": {
+          "name": "Columns",
+          "description": "Number of columns (1-12)."
+        },
+        "algorithm": {
+          "name": "Algorithm",
+          "description": "How the numbers are chosen. The automatic options pick a random algorithm per ticket or per column."
+        },
+        "period": {
+          "name": "Period",
+          "description": "The part of the history the statistics are based on."
+        },
+        "save": {
+          "name": "Save as ticket",
+          "description": "Add the ticket to My tickets for the next draw (and to your sync gist when a token is set)."
+        }
       }
+    },
+    "analyze_ticket": {
+      "name": "Analyze ticket",
+      "description": "Exact win probabilities, expected prize and a history check for a ticket. It is statistics, not a prediction: every column has the same chance.",
+      "fields": {
+        "numbers": {
+          "name": "Numbers",
+          "description": "Columns like '5 12 23 34 45 + 3 7', separated by ';'. Leave empty to use a synced ticket (uid) or the last generated ticket."
+        },
+        "uid": {
+          "name": "Ticket uid",
+          "description": "The uid of a synced ticket (see the My tickets sensor)."
+        },
+        "country": {
+          "name": "Country",
+          "description": "Country code for the prize classes (GR adds the Greek 1+1 class)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Sync tickets",
+      "description": "Merges the tickets with your private sync gist on GitHub now (needs the token in the options)."
     }
   },
   "selector": {

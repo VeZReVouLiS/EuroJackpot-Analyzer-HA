@@ -24,6 +24,11 @@ generate_ticket:
             - weighted
             - balanced
             - smart
+    save:
+      required: false
+      default: false
+      selector:
+        boolean:
     period:
       required: false
       default: all
@@ -38,3 +43,22 @@ generate_ticket:
             - 1y
             - last_100
             - last_50
+
+analyze_ticket:
+  fields:
+    numbers:
+      required: false
+      example: "5 12 23 34 45 + 3 7; 1 2 3 4 5 + 1 2"
+      selector:
+        text:
+          multiline: true
+    uid:
+      required: false
+      selector:
+        text:
+    country:
+      required: false
+      default: GR
+      selector:
+        text:
+sync_tickets:

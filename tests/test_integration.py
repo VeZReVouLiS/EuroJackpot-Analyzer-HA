@@ -182,3 +182,169 @@ async def test_ui_is_skipped_without_a_web_server(hass: HomeAssistant) -> None:
 
     hass.http = None
     await panel.async_register_ui(hass)                                     # must not raise
+
+# --- 0.5.0: alerts, synced tickets, analysis ---------------------------------------------------------------------
+
+from homeassistant.util import dt as dt_util  # noqa: E402
+from pytest_homeassistant_custom_component.common import async_capture_events, async_mock_service  # noqa: E402
+
+PLAYED = {"uid": "t1", "created_at": "2026-10-12T10:00:00", "target_date": "2026-10-13", "algo": "manual", "price": 5.0,
+          "played": True, "updated_at": "2026-10-12T10:00:00.000Z",
+          "columns": [{"main": [11, 17, 20, 22, 1], "euro": [4, 8]}, {"main": [1, 2, 3, 4, 5], "euro": [1, 2]}]}
+
+
+class FakeGist:
+    remote: dict | None = None
+    pushed: list = []
+
+    def __init__(self, token, gist_id=None):
+        self.id = gist_id or "gist1"
+
+    def pull_or_create(self):
+        return FakeGist.remote
+
+    def push(self, doc):
+        FakeGist.pushed.append(doc)
+
+
+async def setup_with(hass, options=None):
+    FakeGist.remote, FakeGist.pushed = None, []
+    e = MockConfigEntry(domain=DOMAIN, unique_id=DOMAIN, data={}, title="EuroJackpot Analyzer", options=options or {})
+    e.add_to_hass(hass)
+    patches = [patch.object(EuroJackpotClient, "last_and_active", AsyncMock(return_value=(parse_allwyn(ALLWYN_LAST), ACTIVE))),
+               patch.object(EuroJackpotClient, "allwyn_range", AsyncMock(return_value=[])),
+               patch.object(EuroJackpotClient, "official_day", AsyncMock(return_value=None)),
+               patch("custom_components.eurojackpot_analyzer.coordinator.ticket_sync.Gist", FakeGist)]
+    for p in patches:
+        p.start()
+    assert await hass.config_entries.async_setup(e.entry_id)
+    await hass.async_block_till_done()
+    return e, patches
+
+
+def stop(patches):
+    for p in patches:
+        p.stop()
+
+
+async def test_new_draw_and_jackpot_alerts(hass: HomeAssistant) -> None:
+    calls = async_mock_service(hass, "notify", "test_phone")
+    draws = async_capture_events(hass, f"{DOMAIN}_new_draw")
+    alerts = async_capture_events(hass, f"{DOMAIN}_jackpot_alert")
+    e, patches = await setup_with(hass, {"notify_service": "notify.test_phone", "jackpot_threshold": 5})
+    coord = e.runtime_data
+    assert not draws                                            # the first start is no news
+    assert len(alerts) == 1 and alerts[0].data["jackpot"] == 10000000.0
+    assert len(calls) == 1 and "10 million" in calls[0].data["message"]
+    new = {**parse_allwyn(ALLWYN_LAST), "date": "2026-10-16", "main": [1, 2, 3, 4, 5], "euro": [1, 2]}
+    with patch.object(EuroJackpotClient, "last_and_active", AsyncMock(return_value=(new, ACTIVE))), \
+         patch.object(EuroJackpotClient, "allwyn_range", AsyncMock(return_value=[new])):
+        await coord.async_refresh()
+        await coord.async_refresh()
+    stop(patches)
+    assert len(draws) == 1 and draws[0].data["text"] == "1 2 3 4 5 + 1 2" and draws[0].data["date"] == "2026-10-16"
+    assert len(alerts) == 1                                     # the jackpot alert comes once per draw
+    assert len(calls) == 2 and calls[1].data["message"] == "Draw 2026-10-16: 1 2 3 4 5 + 1 2" and calls[1].data["title"] == "EuroJackpot"
+
+
+async def test_alert_event_without_a_notify_service(hass: HomeAssistant) -> None:
+    alerts = async_capture_events(hass, f"{DOMAIN}_jackpot_alert")
+    _, patches = await setup_with(hass, {"jackpot_threshold": 5})
+    stop(patches)
+    assert len(alerts) == 1                                     # the event is fired anyway, for automations of the user
+
+
+async def test_ticket_results(hass: HomeAssistant, freezer) -> None:
+    freezer.move_to("2026-10-14 10:00:00+00:00")
+    calls = async_mock_service(hass, "notify", "test_phone")
+    results = async_capture_events(hass, f"{DOMAIN}_ticket_result")
+    e, patches = await setup_with(hass, {"notify_service": "notify.test_phone"})
+    coord = e.runtime_data
+    coord.state["tickets"] = [PLAYED, {**PLAYED, "uid": "t2", "played": False}]
+    await coord.async_refresh()
+    await coord.async_refresh()
+    stop(patches)
+    assert len(results) == 1 and results[0].data["uid"] == "t1"
+    assert results[0].data["winning_columns"] == 1 and results[0].data["total_prize"] > 0 and results[0].data["tiers"][0] == "4+2"
+    assert len(calls) == 1 and "1 of 2 columns won" in calls[0].data["message"] and calls[0].data["message"].startswith("Ticket for 2026-10-13")
+    s = hass.states.get("sensor.eurojackpot_analyzer_my_tickets")
+    assert s.state == "2"
+    by = {t["uid"]: t for t in s.attributes["tickets"]}
+    assert by["t1"]["result"]["winning_columns"] == 1 and by["t2"]["result"] is None
+    assert by["t1"]["columns"][0]["text"] == "11 17 20 22 1 + 4 8" and s.attributes["sync_enabled"] is False
+
+
+async def test_old_results_are_silent(hass: HomeAssistant, freezer) -> None:
+    freezer.move_to("2026-12-01 10:00:00+00:00")
+    calls = async_mock_service(hass, "notify", "test_phone")
+    results = async_capture_events(hass, f"{DOMAIN}_ticket_result")
+    e, patches = await setup_with(hass, {"notify_service": "notify.test_phone"})
+    e.runtime_data.state["tickets"] = [PLAYED]
+    await e.runtime_data.async_refresh()
+    stop(patches)
+    assert not results and not calls
+    assert e.runtime_data.state["results"]["t1"]["winning_columns"] == 1       # recorded all the same
+
+
+async def test_analyze_ticket_service(hass: HomeAssistant) -> None:
+    e, patches = await setup_with(hass)
+    res = await hass.services.async_call(DOMAIN, "analyze_ticket", {"numbers": "11 17 20 22 35 + 4 8; 1 2 3 4 5 + 1 2"},
+                                         blocking=True, return_response=True)
+    ov = res["overall"]
+    assert ov["columns"] == 2 and ov["cost"] == 5.0 and 0 < ov["p_any"] < 1
+    assert abs(ov["p_jackpot"] - 2 / 139838160) < 1e-12 and len(res["columns"]) == 2
+    bt = res["columns"][0]["backtest"]
+    assert bt["draws"] == 998 and bt["best_tier"] == "5+2"                      # the first column is the last draw
+    await hass.services.async_call(DOMAIN, "generate_ticket", {"columns": 3, "algorithm": "hot"}, blocking=True, return_response=True)
+    again = await hass.services.async_call(DOMAIN, "analyze_ticket", {}, blocking=True, return_response=True)
+    assert again["overall"]["columns"] == 3                                     # the last generated ticket
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(DOMAIN, "analyze_ticket", {"numbers": "1 2 3"}, blocking=True, return_response=True)
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(DOMAIN, "analyze_ticket", {"uid": "nope"}, blocking=True, return_response=True)
+    stop(patches)
+
+
+async def test_generate_can_save_the_ticket(hass: HomeAssistant) -> None:
+    e, patches = await setup_with(hass)
+    res = await hass.services.async_call(DOMAIN, "generate_ticket", {"columns": 2, "algorithm": "random", "save": True},
+                                         blocking=True, return_response=True)
+    stop(patches)
+    assert res["target_date"] == "2026-10-16" and "|2026-10-16|" in res["saved_uid"]
+    s = hass.states.get("sensor.eurojackpot_analyzer_my_tickets")
+    assert s.state == "1" and s.attributes["tickets"][0]["played"] is False and len(s.attributes["tickets"][0]["columns"]) == 2
+
+
+async def test_ticket_sync_through_the_gist(hass: HomeAssistant) -> None:
+    from custom_components.eurojackpot_analyzer.core import ticket_sync
+    e, patches = await setup_with(hass, {"github_token": "ghp_test"})
+    FakeGist.remote = ticket_sync.to_doc([PLAYED], {})
+    FakeGist.pushed = []
+    await hass.services.async_call(DOMAIN, "sync_tickets", {}, blocking=True)
+    s = hass.states.get("sensor.eurojackpot_analyzer_my_tickets")
+    assert s.state == "1" and s.attributes["sync_enabled"] is True
+    assert FakeGist.pushed == []                                                # nothing newer here: no write
+    res = await hass.services.async_call(DOMAIN, "generate_ticket", {"columns": 1, "algorithm": "hot", "save": True},
+                                         blocking=True, return_response=True)
+    stop(patches)
+    assert len(FakeGist.pushed) == 1 and {t["uid"] for t in FakeGist.pushed[0]["tickets"]} == {"t1", res["saved_uid"]}
+    assert e.runtime_data.state["gist"] == "gist1"
+
+
+async def test_sync_without_a_token_is_an_error(hass: HomeAssistant) -> None:
+    from homeassistant.exceptions import HomeAssistantError
+    _, patches = await setup_with(hass)
+    with pytest.raises(HomeAssistantError):
+        await hass.services.async_call(DOMAIN, "sync_tickets", {}, blocking=True)
+    stop(patches)
+
+
+async def test_new_options_are_saved(hass: HomeAssistant) -> None:
+    e, patches = await setup_with(hass)
+    stop(patches)
+    flow = await hass.config_entries.options.async_init(e.entry_id)
+    done = await hass.config_entries.options.async_configure(
+        flow["flow_id"], {"scan_interval": 30, "price_per_column": 2.5, "notify_service": " notify.x ", "jackpot_threshold": 40,
+                          "github_token": " tok "})
+    assert done["type"] == "create_entry" and e.options["notify_service"] == "notify.x" and e.options["github_token"] == "tok"
+    assert e.options["jackpot_threshold"] == 40

@@ -6,6 +6,9 @@ NAME = "EuroJackpot Analyzer"
 
 CONF_SCAN_INTERVAL = "scan_interval"      # minutes
 CONF_PRICE = "price_per_column"
+CONF_NOTIFY = "notify_service"             # e.g. notify.mobile_app_my_phone (empty = no notifications)
+CONF_JACKPOT_MIN = "jackpot_threshold"     # million EUR, 0 = no jackpot alert
+CONF_TOKEN = "github_token"                # optional: read (and write) the tickets synced through the user's gist
 
 DEFAULT_SCAN_INTERVAL = 30
 DEFAULT_PRICE = 2.5                        # EUR per column in Greece (2.00 + 0.50 add-on)

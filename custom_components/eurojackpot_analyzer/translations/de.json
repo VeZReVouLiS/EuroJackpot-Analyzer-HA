@@ -16,8 +16,12 @@
         "title": "EuroJackpot Analyzer - Optionen",
         "data": {
           "scan_interval": "Aktualisierungsintervall (Minuten)",
-          "price_per_column": "Preis pro Feld (€)"
-        }
+          "price_per_column": "Preis pro Feld (€)",
+          "notify_service": "Benachrichtigungsdienst (z. B. notify.mobile_app_mein_handy, leer = keiner)",
+          "jackpot_threshold": "Jackpot-Hinweis ab (Mio. €, 0 = aus)",
+          "github_token": "GitHub-Token zum Lesen deiner synchronisierten Scheine (optional)"
+        },
+        "description": "Hinweise zu neuen Ziehungen, hohem Jackpot und den Ergebnissen deiner Scheine. Das Token (Berechtigung: gist) ist dasselbe wie in der App für die Schein-Synchronisierung."
       }
     }
   },
@@ -43,6 +47,9 @@
       },
       "generated_ticket": {
         "name": "Erstellter Spielschein"
+      },
+      "my_tickets": {
+        "name": "Meine Scheine"
       }
     }
   },
@@ -62,8 +69,34 @@
         "period": {
           "name": "Zeitraum",
           "description": "Der Teil der Historie, auf dem die Statistik basiert."
+        },
+        "save": {
+          "name": "Als Schein speichern",
+          "description": "Fügt den Schein für die nächste Ziehung zu Meine Scheine hinzu (und zum Sync-Gist, wenn ein Token gesetzt ist)."
         }
       }
+    },
+    "analyze_ticket": {
+      "name": "Schein analysieren",
+      "description": "Exakte Gewinnwahrscheinlichkeiten, erwarteter Gewinn und Verlaufsprüfung für einen Schein. Das ist Statistik, keine Vorhersage: Jede Reihe hat dieselbe Chance.",
+      "fields": {
+        "numbers": {
+          "name": "Zahlen",
+          "description": "Reihen wie '5 12 23 34 45 + 3 7', getrennt durch ';'. Leer lassen, um einen synchronisierten Schein (uid) oder den zuletzt erzeugten Schein zu verwenden."
+        },
+        "uid": {
+          "name": "Schein-uid",
+          "description": "Die uid eines synchronisierten Scheins (siehe Sensor Meine Scheine)."
+        },
+        "country": {
+          "name": "Land",
+          "description": "Ländercode für die Gewinnklassen (GR fügt die griechische Klasse 1+1 hinzu)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Scheine synchronisieren",
+      "description": "Gleicht die Scheine jetzt mit deinem privaten Sync-Gist bei GitHub ab (Token in den Optionen nötig)."
     }
   },
   "selector": {

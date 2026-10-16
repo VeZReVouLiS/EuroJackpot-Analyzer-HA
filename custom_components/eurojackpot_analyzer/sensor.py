@@ -80,6 +80,7 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities: AddC
     coordinator: EuroJackpotCoordinator = entry.runtime_data
     entities: list[SensorEntity] = [EuroJackpotSensor(coordinator, entry.entry_id, d) for d in SENSORS]
     entities.append(GeneratedTicketSensor(coordinator, entry.entry_id))
+    entities.append(MyTicketsSensor(coordinator, entry.entry_id))
     async_add_entities(entities)
 
 
@@ -131,3 +132,31 @@ class GeneratedTicketSensor(_Base):
     def extra_state_attributes(self) -> dict[str, Any] | None:
         t = self.coordinator.last_ticket
         return dict(t) if t else None
+
+
+class MyTicketsSensor(_Base):
+    """State = number of tickets (synced from the app or generated here); attributes list them with their results."""
+
+    _attr_translation_key = "my_tickets"
+    _attr_icon = "mdi:ticket"
+    _unrecorded_attributes = frozenset({"tickets"})
+
+    def __init__(self, coordinator, entry_id: str) -> None:
+        super().__init__(coordinator, entry_id, "my_tickets")
+
+    @property
+    def native_value(self):
+        return len(self.coordinator.tickets)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        st = self.coordinator.state
+        results = st.get("results", {})
+        out = []
+        for t in sorted(self.coordinator.tickets, key=lambda x: (x["target_date"], x["uid"]), reverse=True):
+            out.append({"uid": t["uid"], "target_date": t["target_date"], "played": bool(t.get("played")),
+                        "algorithm": t.get("algo"), "price": t.get("price"),
+                        "columns": [{"numbers": c["main"], "euro_numbers": c["euro"],
+                                     "text": logic.format_numbers(c["main"], c["euro"])} for c in t.get("columns", [])],
+                        "result": results.get(t["uid"])})
+        return {"tickets": out, "sync_enabled": bool(self.coordinator.token), "synced_at": st.get("synced_at")}

@@ -2,7 +2,7 @@
  * EuroJackpot Analyzer - frontend (served and registered automatically by the integration).
  *
  *   Sidebar panel       eurojackpot-analyzer-panel        full screen, scales with the window, country + language menus
- *   Lovelace cards      custom:eurojackpot-analyzer-last-draw-card | -stats-card | -ticket-card
+ *   Lovelace cards      custom:eurojackpot-analyzer-last-draw-card | -stats-card | -ticket-card | -my-tickets-card
  *
  * Plain custom elements, no framework and no build step. Everything is sized in `em`, so the panel can
  * scale the whole UI just by changing its font size, and the cards use container queries so they adapt
@@ -12,7 +12,7 @@
  * eurojackpot.com style); language (el / en / de) decides the texts. Both are chosen in the panel, remembered
  * in this browser, and can be fixed on a card with `country:` / `language:`.
  */
-const EJ_VERSION = "0.4.4";
+const EJ_VERSION = "0.5.0";
 const DOMAIN = "eurojackpot_analyzer";
 const ASSETS = window.EJ_ASSETS || `/${DOMAIN}/assets`;     // EJ_ASSETS: only the offline preview sets it
 const ID = {
@@ -23,7 +23,11 @@ const ID = {
   frequent: `sensor.${DOMAIN}_most_frequent_numbers`,
   rare: `sensor.${DOMAIN}_least_frequent_numbers`,
   ticket: `sensor.${DOMAIN}_generated_ticket`,
+  myTickets: `sensor.${DOMAIN}_my_tickets`,
 };
+const REPO_HA = "https://github.com/VeZReVouLiS/EuroJackpot-Analyzer-HA";
+const REPO_APP = "https://github.com/VeZReVouLiS/EuroJackpot-Analyzer";
+const WEB_APP = "https://vezrevoulis.github.io/EuroJackpot-Analyzer/";
 const LANGS = ["el", "en", "de"];
 const LOCALES = { el: "el-GR", en: "en-GB", de: "de-DE" };
 
@@ -117,6 +121,190 @@ const TEXT = {
     short: { random: "Zufall", hot: "Heiß", cold: "Kalt", overdue: "Überfällig", weighted: "Gewichtet", balanced: "Ausgewogen", smart: "Intelligent" },
   },
 };
+const TEXT2 = {
+ "el": {
+  "my": "Τα δελτία μου",
+  "noTickets": "Δεν υπάρχουν δελτία ακόμα. Φτιάξε ένα στο «Δελτίο» με «Αποθήκευση στα δελτία μου».",
+  "syncHint": "Για να δεις τα δελτία από τις εφαρμογές σου, βάλε το token GitHub του συγχρονισμού στις Επιλογές της ενσωμάτωσης. Δελτία που φτιάχνεις εδώ με «Αποθήκευση στα δελτία μου» εμφανίζονται κι εδώ.",
+  "played": "παίχτηκε",
+  "notPlayed": "δεν παίχτηκε",
+  "analyze": "Ανάλυση",
+  "analyzing": "Υπολογισμός…",
+  "close": "Κλείσιμο",
+  "save": "Αποθήκευση στα δελτία μου",
+  "resNone": "καμία κερδισμένη στήλη",
+  "resPending": "περιμένει την κλήρωση",
+  "resWon": "κέρδη σε {n} από {tot} στήλες",
+  "resWonSum": "σύνολο {sum}",
+  "resTotal": "{n} δελτία",
+  "syncOff": "χωρίς συγχρονισμό",
+  "syncedAt": "Συγχρονισμός",
+  "about": "Σχετικά",
+  "aboutHowto": "Οδηγίες χρήσης",
+  "aboutSources": "Πηγές δεδομένων",
+  "aboutCredits": "Credits",
+  "aboutLinks": "Σύνδεσμοι",
+  "aboutGuide": "Πίνακας|Η πλαϊνή μπάρα «EuroJackpot Analyzer» δείχνει την τελευταία κλήρωση, τα στατιστικά και τα δελτία. Χώρα και γλώσσα αλλάζουν από τα μενού πάνω δεξιά.\nΚάρτες|Πρόσθεσε στον πίνακα ελέγχου: custom:eurojackpot-analyzer-last-draw-card, -stats-card, -ticket-card και -my-tickets-card.\nΔελτίο|Διάλεξε στήλες και αλγόριθμο και πάτα «Δημιούργησε δελτίο». Με το «Αποθήκευση στα δελτία μου» μπαίνει στη λίστα και συγχρονίζεται με τις εφαρμογές.\nΤα δελτία μου|Δελτία από τις εφαρμογές: Ρυθμίσεις > Συσκευές και υπηρεσίες > EuroJackpot Analyzer > Επιλογές > token GitHub (το ίδιο με τον συγχρονισμό δελτίων). Πάτα «Ανάλυση» για πιθανότητες και έλεγχο ιστορικού.\nΕιδοποιήσεις|Στις Επιλογές όρισε υπηρεσία notify και όριο τζάκποτ. Για αυτοματισμούς: γεγονότα eurojackpot_analyzer_new_draw, _jackpot_alert και _ticket_result.\nΥπηρεσίες|generate_ticket, analyze_ticket και sync_tickets (Εργαλεία προγραμματιστή > Υπηρεσίες).",
+  "aboutSourcesText": "Επίσημη υπηρεσία του EuroJackpot (eurojackpot.com): κληρώσεις από το 2012, επιτυχίες, κέρδη και πού κερδήθηκαν.\nAllwyn (api.opap.gr): ελληνικά στοιχεία από το 2024 και τζάκποτ.",
+  "aboutCreditsText": "Δημιουργός: VeZReVouLiS, με τη βοήθεια του Claude (Anthropic).\nΣημαίες: flag-icons (MIT).",
+  "aboutRepo": "Σελίδα του έργου (Home Assistant)",
+  "aboutApps": "Εφαρμογές Windows, Mac, Android",
+  "aboutWeb": "Εφαρμογή web / iPhone",
+  "aboutDisclaimer": "Ανεπίσημο εργαλείο, χωρίς σύνδεση με την Allwyn ή το EuroJackpot. Η κλήρωση είναι τυχαία και τα στατιστικά δεν αυξάνουν τις πιθανότητες νίκης. Παίξε υπεύθυνα (18+).",
+  "an": {
+   "title": "Ανάλυση δελτίου",
+   "overall": "Σύνολο δελτίου",
+   "cost": "Κόστος ανά κλήρωση",
+   "pAny": "Πιθανότητα για κάποιο βραβείο",
+   "odds": "περίπου 1 στις {n}",
+   "jackpot": "Πιθανότητα τζάκποτ (5 + 2)",
+   "expected": "Αναμενόμενο κέρδος (χωρίς τζάκποτ)",
+   "net": "Αναμενόμενη διαφορά",
+   "tiers": "Πιθανότητες ανά κατηγορία (για μία στήλη)",
+   "thTier": "Κατηγορία",
+   "thP": "Πιθανότητα",
+   "thOdds": "1 στις",
+   "thPrize": "Μέσο βραβείο",
+   "column": "Στήλη",
+   "freq": "Συχνότητα αριθμών: {x}× του μέσου όρου",
+   "gap": "Μέση καθυστέρηση: {n} κληρώσεις",
+   "shape": "{odd} μονοί / {even} ζυγοί, {low} χαμηλοί / {high} υψηλοί, άθροισμα {sum}",
+   "typical": "Τυπικό σχήμα",
+   "untypical": "Ασυνήθιστο σχήμα",
+   "hot": "Πιο συχνοί: {a}",
+   "overdue": "Πιο καθυστερημένοι: {a}",
+   "histWin": "Στο ιστορικό θα είχε κερδίσει σε {n} από {d} κληρώσεις. Καλύτερη κατηγορία: {best}.",
+   "histTotal": "Σύνολο κερδών {won} για κόστος {cost}.",
+   "histNever": "Στο ιστορικό δεν θα είχε κερδίσει σε καμία κλήρωση.",
+   "histUnknown": "Σε παλιές κληρώσεις χωρίς στοιχεία κερδών το ποσό δεν υπολογίζεται.",
+   "histAll": "Όλες οι στήλες μαζί στο ιστορικό: κέρδη {won} για κόστος {cost}.",
+   "assumption": "Το αναμενόμενο κέρδος βασίζεται στον μέσο όρο των πραγματικών βραβείων από το 2022.",
+   "disclaimer": "Εκτίμηση μόνο για ενημέρωση. Η κλήρωση είναι τυχαία: κάθε στήλη έχει ακριβώς τις ίδιες πιθανότητες και το παρελθόν δεν προβλέπει το μέλλον. Δεν αποτελεί πρόβλεψη ή εγγύηση κέρδους. Παίξε υπεύθυνα (18+)."
+  }
+ },
+ "en": {
+  "my": "My tickets",
+  "noTickets": "No tickets yet. Make one in “Ticket” with “Save to my tickets”.",
+  "syncHint": "To see the tickets of your apps, put the GitHub token of the ticket sync into the options of the integration. Tickets you make here with “Save to my tickets” show up here too.",
+  "played": "played",
+  "notPlayed": "not played",
+  "analyze": "Analysis",
+  "analyzing": "Calculating…",
+  "close": "Close",
+  "save": "Save to my tickets",
+  "resNone": "no winning column",
+  "resPending": "waiting for the draw",
+  "resWon": "{n} of {tot} columns won",
+  "resWonSum": "total {sum}",
+  "resTotal": "{n} tickets",
+  "syncOff": "no sync",
+  "syncedAt": "Synced",
+  "about": "About",
+  "aboutHowto": "How to use",
+  "aboutSources": "Data sources",
+  "aboutCredits": "Credits",
+  "aboutLinks": "Links",
+  "aboutGuide": "Panel|The “EuroJackpot Analyzer” sidebar entry shows the last draw, the statistics and the tickets. Country and language are chosen in the menus at the top right.\nCards|Add to a dashboard: custom:eurojackpot-analyzer-last-draw-card, -stats-card, -ticket-card and -my-tickets-card.\nTicket|Choose the columns and an algorithm and press “Generate ticket”. With “Save to my tickets” it goes into the list and syncs with the apps.\nMy tickets|Tickets from the apps: Settings > Devices & services > EuroJackpot Analyzer > Configure > GitHub token (the same as the ticket sync). Press “Analysis” for the odds and a history check.\nNotifications|In the options set a notify service and a jackpot limit. For automations: the events eurojackpot_analyzer_new_draw, _jackpot_alert and _ticket_result.\nServices|generate_ticket, analyze_ticket and sync_tickets (Developer tools > Actions).",
+  "aboutSourcesText": "Official EuroJackpot service (eurojackpot.com): draws since 2012, winners, prizes and where they were won.\nAllwyn (api.opap.gr): Greek figures since 2024 and the jackpot.",
+  "aboutCreditsText": "Author: VeZReVouLiS, with the help of Claude (Anthropic).\nFlags: flag-icons (MIT).",
+  "aboutRepo": "Project page (Home Assistant)",
+  "aboutApps": "Windows, Mac, Android apps",
+  "aboutWeb": "Web app / iPhone",
+  "aboutDisclaimer": "An unofficial tool, not connected to Allwyn or EuroJackpot. Draws are random and statistics do not improve your odds. Play responsibly (18+).",
+  "an": {
+   "title": "Ticket analysis",
+   "overall": "Whole ticket",
+   "cost": "Cost per draw",
+   "pAny": "Chance of some prize",
+   "odds": "about 1 in {n}",
+   "jackpot": "Jackpot chance (5 + 2)",
+   "expected": "Expected prize (without the jackpot)",
+   "net": "Expected difference",
+   "tiers": "Chances per class (for one column)",
+   "thTier": "Class",
+   "thP": "Chance",
+   "thOdds": "1 in",
+   "thPrize": "Average prize",
+   "column": "Column",
+   "freq": "Frequency of the numbers: {x}× the average",
+   "gap": "Average gap: {n} draws",
+   "shape": "{odd} odd / {even} even, {low} low / {high} high, sum {sum}",
+   "typical": "Typical shape",
+   "untypical": "Unusual shape",
+   "hot": "Most frequent: {a}",
+   "overdue": "Most overdue: {a}",
+   "histWin": "In history it would have won in {n} of {d} draws. Best class: {best}.",
+   "histTotal": "Total winnings {won} for a cost of {cost}.",
+   "histNever": "In history it would not have won in any draw.",
+   "histUnknown": "For old draws without prize data the amount cannot be calculated.",
+   "histAll": "All columns together in history: winnings {won} for a cost of {cost}.",
+   "assumption": "The expected prize is based on the average of the real prizes since 2022.",
+   "disclaimer": "An estimate for information only. Draws are random: every column has exactly the same chances and the past does not predict the future. This is not a prediction or a guarantee of winnings. Play responsibly (18+)."
+  }
+ },
+ "de": {
+  "my": "Meine Scheine",
+  "noTickets": "Noch keine Scheine. Erstelle einen unter „Spielschein“ mit „In Meine Scheine speichern“.",
+  "syncHint": "Um die Scheine deiner Apps zu sehen, trage das GitHub-Token der Schein-Synchronisierung in die Optionen der Integration ein. Scheine, die du hier mit „In Meine Scheine speichern“ erstellst, erscheinen auch hier.",
+  "played": "gespielt",
+  "notPlayed": "nicht gespielt",
+  "analyze": "Analyse",
+  "analyzing": "Berechne …",
+  "close": "Schließen",
+  "save": "In Meine Scheine speichern",
+  "resNone": "keine Gewinnreihe",
+  "resPending": "wartet auf die Ziehung",
+  "resWon": "{n} von {tot} Reihen gewonnen",
+  "resWonSum": "Summe {sum}",
+  "resTotal": "{n} Scheine",
+  "syncOff": "keine Synchronisierung",
+  "syncedAt": "Synchronisiert",
+  "about": "Info",
+  "aboutHowto": "Anleitung",
+  "aboutSources": "Datenquellen",
+  "aboutCredits": "Credits",
+  "aboutLinks": "Links",
+  "aboutGuide": "Panel|Der Eintrag „EuroJackpot Analyzer“ in der Seitenleiste zeigt die letzte Ziehung, die Statistik und die Scheine. Land und Sprache wählst du in den Menüs oben rechts.\nKarten|Zum Dashboard hinzufügen: custom:eurojackpot-analyzer-last-draw-card, -stats-card, -ticket-card und -my-tickets-card.\nSpielschein|Wähle Felder und einen Algorithmus und klicke auf „Spielschein erstellen“. Mit „In Meine Scheine speichern“ kommt er in die Liste und wird mit den Apps synchronisiert.\nMeine Scheine|Scheine aus den Apps: Einstellungen > Geräte & Dienste > EuroJackpot Analyzer > Konfigurieren > GitHub-Token (dasselbe wie bei der Schein-Synchronisierung). Klicke auf „Analyse“ für die Chancen und eine Verlaufsprüfung.\nBenachrichtigungen|Lege in den Optionen einen Notify-Dienst und eine Jackpot-Grenze fest. Für Automatisierungen: die Ereignisse eurojackpot_analyzer_new_draw, _jackpot_alert und _ticket_result.\nDienste|generate_ticket, analyze_ticket und sync_tickets (Entwicklerwerkzeuge > Aktionen).",
+  "aboutSourcesText": "Offizieller EuroJackpot-Dienst (eurojackpot.com): Ziehungen seit 2012, Gewinner, Gewinne und wo gewonnen wurde.\nAllwyn (api.opap.gr): griechische Zahlen seit 2024 und der Jackpot.",
+  "aboutCreditsText": "Autor: VeZReVouLiS, mit Unterstützung von Claude (Anthropic).\nFlaggen: flag-icons (MIT).",
+  "aboutRepo": "Projektseite (Home Assistant)",
+  "aboutApps": "Apps für Windows, Mac, Android",
+  "aboutWeb": "Web-App / iPhone",
+  "aboutDisclaimer": "Ein inoffizielles Werkzeug ohne Verbindung zu Allwyn oder EuroJackpot. Die Ziehung ist zufällig und Statistiken erhöhen die Gewinnchancen nicht. Spiele verantwortungsvoll (ab 18).",
+  "an": {
+   "title": "Analyse des Spielscheins",
+   "overall": "Ganzer Schein",
+   "cost": "Kosten pro Ziehung",
+   "pAny": "Chance auf irgendeinen Gewinn",
+   "odds": "etwa 1 zu {n}",
+   "jackpot": "Jackpot-Chance (5 + 2)",
+   "expected": "Erwarteter Gewinn (ohne Jackpot)",
+   "net": "Erwartete Differenz",
+   "tiers": "Chancen pro Klasse (für ein Feld)",
+   "thTier": "Klasse",
+   "thP": "Chance",
+   "thOdds": "1 zu",
+   "thPrize": "Ø Gewinn",
+   "column": "Feld",
+   "freq": "Häufigkeit der Zahlen: {x}× des Durchschnitts",
+   "gap": "Durchschnittliche Pause: {n} Ziehungen",
+   "shape": "{odd} ungerade / {even} gerade, {low} niedrig / {high} hoch, Summe {sum}",
+   "typical": "Typisches Muster",
+   "untypical": "Ungewöhnliches Muster",
+   "hot": "Am häufigsten: {a}",
+   "overdue": "Am längsten überfällig: {a}",
+   "histWin": "In der Historie hätte es in {n} von {d} Ziehungen gewonnen. Beste Klasse: {best}.",
+   "histTotal": "Gewinne insgesamt {won} bei Kosten von {cost}.",
+   "histNever": "In der Historie hätte es in keiner Ziehung gewonnen.",
+   "histUnknown": "Für alte Ziehungen ohne Gewinndaten kann der Betrag nicht berechnet werden.",
+   "histAll": "Alle Felder zusammen in der Historie: Gewinne {won} bei Kosten von {cost}.",
+   "assumption": "Der erwartete Gewinn basiert auf dem Durchschnitt der tatsächlichen Gewinne seit 2022.",
+   "disclaimer": "Eine Schätzung nur zur Information. Die Ziehung ist zufällig: Jedes Feld hat genau die gleichen Chancen und die Vergangenheit sagt die Zukunft nicht voraus. Das ist weder eine Vorhersage noch eine Gewinngarantie. Spiele verantwortungsvoll (ab 18)."
+  }
+ }
+};
+for (const l of LANGS) Object.assign(TEXT[l], TEXT2[l]);
+const fill = (str, v) => String(str).replace(/\{(\w+)\}/g, (_, k) => (v[k] == null ? "" : v[k]));
 const normLang = (l) => { l = String(l || "").toLowerCase().slice(0, 2); return LANGS.includes(l) ? l : "en"; };
 
 const STYLE = `
@@ -204,6 +392,32 @@ select { font: inherit; font-size: 1em; color: inherit; background: var(--second
 .total .sum { font-size: 2.1em; font-weight: 900; }
 .empty { padding: 1.3em .6em; text-align: center; color: var(--secondary-text-color); }
 .note { margin-top: .9em; font-size: .8em; color: var(--secondary-text-color); }
+
+.modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 4vh 3vw; overflow-y: auto;
+  background: rgba(8,12,24,.62); font-size: clamp(14px, calc(0.3vw + 12px), 22px); }
+.modal .box { position: relative; width: min(46em, 100%); box-sizing: border-box; padding: 1.4em 1.5em 1.5em; border-radius: 1.2em; color: var(--primary-text-color);
+  background: var(--card-background-color); border: 1px solid var(--divider-color); box-shadow: 0 1em 3em rgba(0,0,0,.5); }
+.modal .x { position: absolute; top: .7em; right: .7em; width: 2.2em; height: 2.2em; border-radius: .7em; border: 1px solid var(--divider-color);
+  background: var(--secondary-background-color); color: inherit; font: inherit; cursor: pointer; }
+.modal h3 { margin: 0 2em .6em 0; font-size: 1.35em; } .modal h4 { margin: 1.3em 0 .4em; font-size: 1.05em; }
+.modal ul { margin: .3em 0 0; padding-left: 1.2em; } .modal li { margin: .35em 0; line-height: 1.4; }
+.modal a { color: var(--primary-color); font-weight: 700; text-decoration: none; } .modal a:hover { text-decoration: underline; }
+.kv { display: flex; justify-content: space-between; gap: 1em; padding: .45em 0; border-top: 1px solid var(--divider-color); }
+.kv span { color: var(--secondary-text-color); } .kv b { text-align: right; }
+.anc { margin-top: 1em; padding-top: .2em; } .anc .col { margin-top: .3em; }
+.links { display: flex; flex-wrap: wrap; gap: .6em 1em; margin-top: .4em; }
+.modal .note { margin-top: 1.3em; }
+.ab-head { display: flex; align-items: center; gap: .9em; margin-bottom: .4em; } .ab-head .logo { width: 3.4em; height: 3.4em; }
+.tk { margin-top: .8em; padding: .8em .9em; border-radius: 1em; background: var(--secondary-background-color); border: 1px solid var(--divider-color); }
+.tk.won { border-color: rgba(52,211,153,.8); box-shadow: 0 0 0 1px rgba(52,211,153,.35) inset; }
+.tk .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4em .8em; }
+.tk .when2 { font-weight: 800; font-size: .95em; } .tk .badge { font-size: .74em; padding: .15em .7em; border-radius: 999px; background: var(--divider-color); font-weight: 700; margin-left: .5em; }
+.tk .res { font-size: .9em; margin-top: .45em; color: var(--secondary-text-color); } .tk .res.win { color: #34d399; font-weight: 700; }
+.tk .col { background: transparent; border: 0; padding: .25em 0; margin-top: .2em; }
+.minor { font: inherit; font-weight: 700; font-size: .9em; color: inherit; background: var(--secondary-background-color); border: 1px solid var(--divider-color);
+  border-radius: .7em; padding: .4em .9em; cursor: pointer; } .minor:hover { filter: brightness(1.15); }
+.chk { display: flex; align-items: center; gap: .6em; margin-top: .9em; font-weight: 600; cursor: pointer; }
+.chk input { width: 1.2em; height: 1.2em; }
 @container (max-width: 400px) { .tag { display: none; } .col .tg { display: none; } .col .no { width: 1.5em; height: 1.5em; } .heat { gap: .2em; } .cell b { font-size: 1em; } }
 `;
 
@@ -225,6 +439,13 @@ class EJBase extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this._cfg = {};
+    this._modal = null;
+    this.shadowRoot.addEventListener("click", (e) => {
+      const close = e.target.closest("[data-close]");
+      if (close && (close.classList.contains("x") || e.target === close)) { this._modal = null; this._render(); return; }
+      const an = e.target.closest("[data-an]");
+      if (an) this.analyze(an.dataset.an);
+    });
   }
   connectedCallback() { ALL_ELEMENTS.add(this); }
   disconnectedCallback() { ALL_ELEMENTS.delete(this); this._stopTimer(); }
@@ -268,7 +489,54 @@ class EJBase extends HTMLElement {
   ball(n, cls = "", cap = "") {
     return `<div class="ballbox"><span class="ball ${cls}">${esc(n)}</span><span class="cap">${esc(cap)}</span></div>`;
   }
-  shell(inner, cls = "") { return `<style>${STYLE}</style><ha-card><div class="wrap ${cls}">${inner}</div></ha-card>`; }
+  shell(inner, cls = "") {
+    const modal = this._modal ? `<div class="modal" data-close><div class="box"><button class="x" data-close aria-label="${esc(this.tr.close)}">✕</button>${this._modal}</div></div>` : "";
+    return `<style>${STYLE}</style><ha-card><div class="wrap ${cls}">${inner}</div></ha-card>${modal}`;
+  }
+  /* the statistics of a ticket: of a synced one (uid) or of the last generated one (empty) */
+  async analyze(uid) {
+    this._modal = `<div class="empty">${this.tr.analyzing}</div>`;
+    this._render();
+    try {
+      const data = { country: this.country };
+      if (uid) data.uid = uid;
+      const r = await this._hass.connection.sendMessagePromise({ type: "call_service", domain: DOMAIN, service: "analyze_ticket", service_data: data, return_response: true });
+      this._modal = `<h3>${this.tr.an.title}</h3>${this.analysisHtml(r.response)}`;
+    } catch (e) {
+      this._modal = `<div class="empty">${esc((e && e.message) || e)}</div>`;
+    }
+    this._render();
+  }
+  analysisHtml(res) {
+    const a = this.tr.an, o = res.overall, money = (n) => this.fmtMoney(n);
+    const loc = (x, o) => Number(x).toLocaleString(this.locale, o);
+    const pct = (p) => loc(p >= 0.01 ? (p * 100).toFixed(2) : (p * 100).toPrecision(2), { maximumFractionDigits: 8 }) + " %";
+    const tier = (x) => String(x).replace("+", " + ");
+    const rows = o.tiers.map((x) => `<tr><td>${tier(x.tier)}</td><td>${pct(x.p)}</td><td>${this.fmtN(x.odds)}</td><td>${x.avg_prize ? money(x.avg_prize) : "-"}</td></tr>`).join("");
+    const cols = res.columns.map((c, i) => {
+      const p = c.profile, b = c.backtest;
+      const balls = c.main.map((n) => this.ball(n, "sm")).join("") + '<span class="sep"></span>' + c.euro.map((n) => this.ball(n, "euro sm")).join("");
+      const hist = b.wins.length
+        ? fill(a.histWin, { n: b.wins.length, d: b.draws, best: tier(b.best_tier) }) + " " + (b.complete ? fill(a.histTotal, { won: money(b.total_prize), cost: money(b.cost) }) : a.histUnknown)
+        : a.histNever;
+      return `<div class="anc"><div class="col"><span class="no">${i + 1}</span><div class="balls nowrap">${balls}</div></div><ul>
+        <li>${fill(a.freq, { x: p.freq_ratio == null ? "-" : loc(p.freq_ratio, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) })}</li><li>${fill(a.gap, { n: loc(p.avg_gap, { maximumFractionDigits: 1 }) })}</li>
+        <li>${fill(a.shape, p)} - ${p.typical ? a.typical : a.untypical}</li>
+        <li>${fill(a.hot, { a: p.hottest.join(", ") })}</li><li>${fill(a.overdue, { a: p.most_overdue.join(", ") })}</li><li>${hist}</li></ul></div>`;
+    }).join("");
+    const bt = o.backtest;
+    return `<h4>${a.overall}</h4>
+      <div class="kv"><span>${a.cost}</span><b>${money(o.cost)}</b></div>
+      <div class="kv"><span>${a.pAny}</span><b>${pct(o.p_any)} (${fill(a.odds, { n: this.fmtN(o.odds_any) })})</b></div>
+      <div class="kv"><span>${a.jackpot}</span><b>${fill(a.odds, { n: this.fmtN(o.odds_jackpot) })}</b></div>
+      <div class="kv"><span>${a.expected}</span><b>${money(o.expected_prize)}</b></div>
+      <div class="kv"><span>${a.net}</span><b>${money(o.expected_net)}</b></div>
+      <div class="note">${a.assumption}</div>
+      <h4>${a.tiers}</h4><table><tr><th>${a.thTier}</th><th>${a.thP}</th><th>${a.thOdds}</th><th>${a.thPrize}</th></tr>${rows}</table>
+      ${cols}
+      <div class="note">${fill(a.histAll, { won: money(bt.total_prize), cost: money(bt.cost) })}</div>
+      <div class="note">${a.disclaimer}</div>`;
+  }
   _stopTimer() { if (this._timer) { clearInterval(this._timer); this._timer = null; } }
   _render() { this.shadowRoot.innerHTML = this.shell(`<div class="empty">${this.tr.noData}</div>`); }
 }
@@ -409,13 +677,14 @@ class EJTicketCard extends EJBase {
     this._cols = Number(cfg.columns || 5);
     this._algo = cfg.algorithm || "auto_column";
     this._busy = false;
+    this._save = !!cfg.save;
     super.setConfig(cfg);
   }
   async _generate() {
     this._busy = true;
     this._render();
     try {
-      await this._hass.callService(DOMAIN, "generate_ticket", { columns: this._cols, algorithm: this._algo, period: this._cfg.period || "all" });
+      await this._hass.callService(DOMAIN, "generate_ticket", { columns: this._cols, algorithm: this._algo, period: this._cfg.period || "all", save: this._save });
     } finally {
       this._busy = false;
       this._render();
@@ -435,7 +704,8 @@ class EJTicketCard extends EJBase {
         <div class="balls nowrap">${c.numbers.map((n) => this.ball(n, "sm")).join("")}<span class="sep"></span>${c.euro_numbers.map((n) => this.ball(n, "euro sm")).join("")}</div>
         <span class="tg">${esc(t.short[c.algorithm] || c.algorithm)}</span></div>`).join("");
       result = `${rows}<div class="total"><div><div class="label">${t.total}</div><div class="sub">${a.column_count} × ${this.fmtMoney(a.price_per_column)}</div></div>
-        <div class="sum">${this.fmtMoney(a.total_cost)}</div></div>`;
+        <div class="sum">${this.fmtMoney(a.total_cost)}</div></div>
+        <div class="controls" style="margin-top:.8em"><button class="minor" data-an="">📊 ${t.analyze}</button></div>`;
     }
     root.innerHTML = this.shell(`
       <div class="head"><div class="title"><div class="logo"><span>🎟️</span></div><div><b>${t.ticket}</b><span class="sub">× ${this.fmtMoney(price)} ${t.perColumn}</span></div></div></div>
@@ -443,6 +713,7 @@ class EJTicketCard extends EJBase {
         <div class="stepper"><span class="label">${t.columns}</span><button data-act="minus" aria-label="-">−</button><output>${this._cols}</output><button data-act="plus" aria-label="+">+</button></div>
         <label class="stepper"><span class="label">${t.algorithm}</span><select data-act="algo">${algoOpts}</select></label>
       </div>
+      <label class="chk"><input type="checkbox" data-act="save" ${this._save ? "checked" : ""}>${esc(t.save)}</label>
       <button class="go" data-act="go" ${this._busy ? "disabled" : ""}>🎲 ${this._busy ? t.generating : t.generate}</button>
       <div class="sect">${result}</div>
       <div class="note">${t.disclaimer}</div>`);
@@ -450,7 +721,43 @@ class EJTicketCard extends EJBase {
     q('[data-act="minus"]').onclick = () => { this._cols = Math.max(1, this._cols - 1); this._render(); };
     q('[data-act="plus"]').onclick = () => { this._cols = Math.min(12, this._cols + 1); this._render(); };
     q('[data-act="algo"]').onchange = (e) => { this._algo = e.target.value; };
+    q('[data-act="save"]').onchange = (e) => { this._save = e.target.checked; };
     q('[data-act="go"]').onclick = () => this._generate();
+  }
+}
+
+
+/* --------------------------------------------------------------- my tickets */
+class EJMyTicketsCard extends EJBase {
+  static get defaults() { return { max_tickets: 6 }; }
+  static getStubConfig() { return { max_tickets: 6 }; }
+  get ids() { return [ID.myTickets]; }
+  getCardSize() { return 8; }
+  _render() {
+    const root = this.shadowRoot;
+    if (!this._hass) { root.innerHTML = this.shell(""); return; }
+    const t = this.tr, s = this.st(ID.myTickets), at = (s && s.attributes) || {};
+    const all = at.tickets || [], list = all.slice(0, Number(this._cfg.max_tickets) || 6);
+    const today = new Date().toISOString().slice(0, 10);
+    const items = list.map((k) => {
+      let res = "";
+      if (k.result) {
+        const r = k.result;
+        res = r.winning_columns
+          ? `<div class="res win">✔ ${fill(t.resWon, { n: r.winning_columns, tot: k.columns.length })}${r.complete ? " - " + fill(t.resWonSum, { sum: this.fmtMoney(r.total_prize) }) : ""}</div>`
+          : `<div class="res">${t.resNone}</div>`;
+      } else if (k.played) {
+        res = `<div class="res">${k.target_date >= today ? t.resPending : ""}</div>`;
+      }
+      const cols = k.columns.map((c) => `<div class="col"><div class="balls nowrap">${c.numbers.map((n) => this.ball(n, "sm")).join("")}<span class="sep"></span>${c.euro_numbers.map((n) => this.ball(n, "euro sm")).join("")}</div></div>`).join("");
+      return `<div class="tk ${k.result && k.result.winning_columns ? "won" : ""}"><div class="row"><div><span class="when2">${esc(this.fmtDate(k.target_date))}</span><span class="badge">${k.played ? t.played : t.notPlayed}</span></div>
+        <button class="minor" data-an="${esc(k.uid)}">📊 ${t.analyze}</button></div>${cols}${res}</div>`;
+    }).join("");
+    const empty = `<div class="empty">${at.sync_enabled ? t.noTickets : t.syncHint}</div>`;
+    root.innerHTML = this.shell(`
+      <div class="head"><div class="title"><div class="logo"><span>🎫</span></div><div><b>${t.my}</b><span class="sub">${fill(t.resTotal, { n: all.length })}${at.sync_enabled ? "" : " · " + t.syncOff}</span></div></div></div>
+      ${list.length ? items : empty}
+      <div class="note">${t.disclaimer}</div>`);
   }
 }
 
@@ -489,6 +796,33 @@ const PANEL_STYLE = `
 @media (max-width: 1350px) { .cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cols > :nth-child(3) { grid-column: 1 / -1; } }
 @media (max-width: 800px) { .cols { grid-template-columns: minmax(0, 1fr); } .cols > :nth-child(3) { grid-column: auto; } }
 ha-menu-button { margin-right: .4em; }
+.stack { display: grid; gap: clamp(12px, 1.5vw, 32px); min-width: 0; }
+
+.modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 4vh 3vw; overflow-y: auto;
+  background: rgba(8,12,24,.62); font-size: clamp(14px, calc(0.3vw + 12px), 22px); }
+.modal .box { position: relative; width: min(46em, 100%); box-sizing: border-box; padding: 1.4em 1.5em 1.5em; border-radius: 1.2em; color: var(--primary-text-color);
+  background: var(--card-background-color); border: 1px solid var(--divider-color); box-shadow: 0 1em 3em rgba(0,0,0,.5); }
+.modal .x { position: absolute; top: .7em; right: .7em; width: 2.2em; height: 2.2em; border-radius: .7em; border: 1px solid var(--divider-color);
+  background: var(--secondary-background-color); color: inherit; font: inherit; cursor: pointer; }
+.modal h3 { margin: 0 2em .6em 0; font-size: 1.35em; } .modal h4 { margin: 1.3em 0 .4em; font-size: 1.05em; }
+.modal ul { margin: .3em 0 0; padding-left: 1.2em; } .modal li { margin: .35em 0; line-height: 1.4; }
+.modal a { color: var(--primary-color); font-weight: 700; text-decoration: none; } .modal a:hover { text-decoration: underline; }
+.kv { display: flex; justify-content: space-between; gap: 1em; padding: .45em 0; border-top: 1px solid var(--divider-color); }
+.kv span { color: var(--secondary-text-color); } .kv b { text-align: right; }
+.anc { margin-top: 1em; padding-top: .2em; } .anc .col { margin-top: .3em; }
+.links { display: flex; flex-wrap: wrap; gap: .6em 1em; margin-top: .4em; }
+.modal .note { margin-top: 1.3em; }
+.ab-head { display: flex; align-items: center; gap: .9em; margin-bottom: .4em; } .ab-head .logo { width: 3.4em; height: 3.4em; }
+.tk { margin-top: .8em; padding: .8em .9em; border-radius: 1em; background: var(--secondary-background-color); border: 1px solid var(--divider-color); }
+.tk.won { border-color: rgba(52,211,153,.8); box-shadow: 0 0 0 1px rgba(52,211,153,.35) inset; }
+.tk .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4em .8em; }
+.tk .when2 { font-weight: 800; font-size: .95em; } .tk .badge { font-size: .74em; padding: .15em .7em; border-radius: 999px; background: var(--divider-color); font-weight: 700; margin-left: .5em; }
+.tk .res { font-size: .9em; margin-top: .45em; color: var(--secondary-text-color); } .tk .res.win { color: #34d399; font-weight: 700; }
+.tk .col { background: transparent; border: 0; padding: .25em 0; margin-top: .2em; }
+.minor { font: inherit; font-weight: 700; font-size: .9em; color: inherit; background: var(--secondary-background-color); border: 1px solid var(--divider-color);
+  border-radius: .7em; padding: .4em .9em; cursor: pointer; } .minor:hover { filter: brightness(1.15); }
+.chk { display: flex; align-items: center; gap: .6em; margin-top: .9em; font-weight: 600; cursor: pointer; }
+.chk input { width: 1.2em; height: 1.2em; }
 `;
 
 class EJPanel extends HTMLElement {
@@ -497,6 +831,11 @@ class EJPanel extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._built = false;
     this._onDocClick = () => this._closeMenus();
+    this._about = false;
+    this.shadowRoot.addEventListener("click", (e) => {
+      const close = e.target.closest("[data-close]");
+      if (close && (close.classList.contains("x") || e.target === close)) { this._about = false; this._renderAbout(); }
+    });
   }
   connectedCallback() { ALL_ELEMENTS.add(this); document.addEventListener("click", this._onDocClick); }
   disconnectedCallback() { ALL_ELEMENTS.delete(this); document.removeEventListener("click", this._onDocClick); }
@@ -530,11 +869,15 @@ class EJPanel extends HTMLElement {
         <div class="cols"></div>
       </div>`;
     const cols = this.shadowRoot.querySelector(".cols");
-    this._cards = [document.createElement("eurojackpot-analyzer-last-draw-card"), document.createElement("eurojackpot-analyzer-stats-card"), document.createElement("eurojackpot-analyzer-ticket-card")];
+    this._cards = ["last-draw", "stats", "ticket", "my-tickets"].map((n) => document.createElement(`eurojackpot-analyzer-${n}-card`));
     this._cards[0].setConfig({});
     this._cards[1].setConfig({});
     this._cards[2].setConfig({ columns: 5, algorithm: "auto_column" });
-    for (const el of this._cards) cols.appendChild(el);
+    this._cards[3].setConfig({});
+    const stack = document.createElement("div");
+    stack.className = "stack";
+    stack.append(this._cards[2], this._cards[3]);
+    cols.append(this._cards[0], this._cards[1], stack);
     this._menu = this.shadowRoot.querySelector("ha-menu-button");
     this._menu.hass = this._hass;
     this._menu.narrow = !!this._narrow;
@@ -551,7 +894,7 @@ class EJPanel extends HTMLElement {
   _renderBar() {
     const t = TEXT[this.lang], root = this.shadowRoot;
     root.querySelector("[data-sub]").textContent = t.panelSub;
-    const refresh = `<button class="tool" data-act="refresh" title="${t.refresh}">↻ <span>${t.refresh}</span></button>`;
+    const refresh = `<button class="tool" data-act="about" title="${esc(t.about)}">ⓘ <span>${esc(t.about)}</span></button><button class="tool" data-act="refresh" title="${t.refresh}">↻ <span>${t.refresh}</span></button>`;
     let menus = "";
     if (CAT) {
       const countries = CAT.countries.map((c) => ({ value: c.code, flag: c.flag, label: c.name.own, sub: c.supported ? "" : c.soon, disabled: !c.supported }));
@@ -559,6 +902,7 @@ class EJPanel extends HTMLElement {
       menus = this._dropdown("country", countries, this.country, t.country) + this._dropdown("lang", langs, this.lang, t.language);
     }
     root.querySelector("[data-tools]").innerHTML = refresh + menus;
+    root.querySelector('[data-act="about"]').onclick = (e) => { e.stopPropagation(); this._about = true; this._renderAbout(); };
     root.querySelector('[data-act="refresh"]').onclick = (e) => {
       e.stopPropagation();
       const ids = [ID.last].filter((i) => this._hass.states[i]);
@@ -575,19 +919,38 @@ class EJPanel extends HTMLElement {
       }; });
     });
   }
+  _renderAbout() {
+    const root = this.shadowRoot;
+    let box = root.querySelector("[data-about]");
+    if (!this._about) { if (box) box.remove(); return; }
+    if (!box) { box = document.createElement("div"); box.dataset.about = ""; root.appendChild(box); }
+    const t = TEXT[this.lang], lines = (k) => String(t[k]).split("\n").filter(Boolean);
+    const guide = lines("aboutGuide").map((l) => { const [h, d] = l.split("|"); return `<li><b>${esc(h)}:</b> ${esc(d || "")}</li>`; }).join("");
+    const li = (k) => lines(k).map((l) => `<li>${esc(l)}</li>`).join("");
+    const a = (url, label) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;
+    box.innerHTML = `<div class="modal" data-close><div class="box"><button class="x" data-close aria-label="${esc(t.close)}">✕</button>
+      <div class="ab-head"><div class="logo"><img src="${ASSETS}/logo.svg" alt=""></div><div><h3 style="margin:0">EuroJackpot Analyzer</h3><div class="sub">v${EJ_VERSION}</div></div></div>
+      <h4>${t.aboutHowto}</h4><ul>${guide}</ul>
+      <h4>${t.aboutSources}</h4><ul>${li("aboutSourcesText")}</ul>
+      <h4>${t.aboutCredits}</h4><ul>${li("aboutCreditsText")}</ul>
+      <h4>${t.aboutLinks}</h4><div class="links">${a(REPO_HA, "🔗 " + t.aboutRepo)}${a(REPO_APP + "/releases", "⬇ " + t.aboutApps)}${a(WEB_APP, "🌐 " + t.aboutWeb)}</div>
+      <div class="note">${t.aboutDisclaimer}</div></div></div>`;
+  }
   /* instant switch: remember the choice and redraw this panel and every card */
   _setPref(key, value) {
     setPref(key, value);
     this._renderBar();
+    this._renderAbout();
     for (const el of ALL_ELEMENTS) if (el !== this && el.relang) el.relang();
   }
-  relang() { if (this._built) this._renderBar(); }       // the catalogue arrived
+  relang() { if (this._built) { this._renderBar(); this._renderAbout(); } }       // the catalogue arrived
 }
 
 const CARDS = [
   ["eurojackpot-analyzer-last-draw-card", EJLastDrawCard, "EuroJackpot Analyzer - Τελευταία κλήρωση / Last draw", "Last draw numbers, jackpot, next draw with countdown and prizes."],
   ["eurojackpot-analyzer-stats-card", EJStatsCard, "EuroJackpot Analyzer - Στατιστικά / Statistics", "Overdue heat-map of the 50 numbers and rankings."],
   ["eurojackpot-analyzer-ticket-card", EJTicketCard, "EuroJackpot Analyzer - Δελτίο / Ticket", "Ticket generator with 1-12 columns."],
+  ["eurojackpot-analyzer-my-tickets-card", EJMyTicketsCard, "EuroJackpot Analyzer - Τα δελτία μου / My tickets", "The tickets of your apps and the ones saved here, with results and analysis."],
 ];
 window.customCards = window.customCards || [];
 for (const [tag, cls, name, description] of CARDS) {
