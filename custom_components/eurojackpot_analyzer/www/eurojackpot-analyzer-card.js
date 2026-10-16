@@ -12,7 +12,7 @@
  * eurojackpot.com style); language (el / en / de) decides the texts. Both are chosen in the panel, remembered
  * in this browser, and can be fixed on a card with `country:` / `language:`.
  */
-const EJ_VERSION = "0.4.2";
+const EJ_VERSION = "0.4.3";
 const DOMAIN = "eurojackpot_analyzer";
 const ASSETS = window.EJ_ASSETS || `/${DOMAIN}/assets`;     // EJ_ASSETS: only the offline preview sets it
 const ID = {
@@ -61,7 +61,6 @@ const TEXT = {
     empty: "Διάλεξε στήλες και αλγόριθμο και πάτα «Δημιούργησε δελτίο».",
     generating: "Δημιουργία…", disclaimer: "Η κλήρωση είναι τυχαία· τα στατιστικά δεν αυξάνουν τις πιθανότητες. Παίξε υπεύθυνα (18+).",
     refresh: "Ανανέωση", language: "Γλώσσα", country: "Χώρα", panelSub: "Κληρώσεις · Στατιστικά · Δελτία",
-    m: (n) => `${n} ${n === 1 ? "αριθμός" : "αριθμοί"}`, e: (n) => `${n} Euro ${n === 1 ? "αριθμός" : "αριθμοί"}`,
     algos: {
       auto_ticket: "Αυτόματος – ένας ανά δελτίο", auto_column: "Αυτόματος – ένας ανά στήλη", random: "Καθαρά τυχαίος",
       hot: "Συχνοί (hot)", cold: "Σπάνιοι (cold)", overdue: "Καθυστερημένοι", weighted: "Σταθμισμένος",
@@ -86,7 +85,6 @@ const TEXT = {
     empty: "Pick the columns and an algorithm, then press “Generate ticket”.",
     generating: "Generating…", disclaimer: "Draws are random; statistics do not improve your odds. Play responsibly (18+).",
     refresh: "Refresh", language: "Language", country: "Country", panelSub: "Draws · Statistics · Tickets",
-    m: (n) => `${n} ${n === 1 ? "number" : "numbers"}`, e: (n) => `${n} Euro ${n === 1 ? "number" : "numbers"}`,
     algos: {
       auto_ticket: "Automatic – one per ticket", auto_column: "Automatic – one per column", random: "Pure random",
       hot: "Hot numbers", cold: "Cold numbers", overdue: "Overdue numbers", weighted: "Frequency-weighted",
@@ -111,7 +109,6 @@ const TEXT = {
     empty: "Wähle Felder und einen Algorithmus und klicke auf „Spielschein erstellen“.",
     generating: "Wird erstellt …", disclaimer: "Die Ziehung ist zufällig; Statistiken erhöhen die Gewinnchancen nicht. Spiele verantwortungsvoll (ab 18).",
     refresh: "Aktualisieren", language: "Sprache", country: "Land", panelSub: "Ziehungen · Statistik · Spielscheine",
-    m: (n) => `${n} Richtige`, e: (n) => `${n} ${n === 1 ? "Eurozahl" : "Eurozahlen"}`,
     algos: {
       auto_ticket: "Automatisch – einer pro Schein", auto_column: "Automatisch – einer pro Feld", random: "Reiner Zufall",
       hot: "Heiße Zahlen", cold: "Kalte Zahlen", overdue: "Überfällige Zahlen", weighted: "Nach Häufigkeit gewichtet",
@@ -283,10 +280,7 @@ class EJLastDrawCard extends EJBase {
   static getStubConfig() { return { show_prizes: true }; }
   get ids() { return [this._cfg.entity || ID.last, ID.next, ID.jackpot]; }
   getCardSize() { return this._cfg.show_prizes ? 9 : 4; }
-  matchText(tier) {
-    const t = this.tr, [m, e] = String(tier).split("+").map(Number);
-    return [t.m(m), e ? t.e(e) : ""].filter(Boolean).join(" + ");
-  }
+  matchText(tier) { return String(tier).replace("+", " + "); }       // "5 + 2", like in the Greek layout
   /* "Next draw 16/10/2026 - 21:00" in the country's time zone, with a DD:HH:MM:SS countdown */
   nextBox(next) {
     this._nextAt = null;
@@ -326,7 +320,7 @@ class EJLastDrawCard extends EJBase {
     const t = this.tr, prizes = a.prizes;
     let table;
     if (this.countryInfo && this.countryInfo.layout === "official") {      // as on the official eurojackpot.com page
-      const rows = prizes.filter((p) => p.tier !== "1+1").map((p, i) => `<tr><td>${ROMAN[i] || i + 1}</td><td>${esc(this.matchText(p.tier))}</td>
+      const rows = prizes.filter((p) => p.tier !== "1+1").map((p, i) => `<tr class="${p.winners_all_countries > 0 ? "gr" : ""}"><td>${ROMAN[i] || i + 1}</td><td>${esc(this.matchText(p.tier))}</td>
         <td class="nw">${p.winners_all_countries ? `${this.fmtN(p.winners_all_countries)} ×` : `<span class="sub">${t.noWinner}</span>`}</td>
         <td class="nw">${p.prize_per_winner > 0 ? this.fmtMoney(p.prize_per_winner) : "—"}</td></tr>`).join("");
       table = `<table class="off"><thead><tr><th>${t.cls}</th><th>${t.match}</th><th>${t.winnersN}</th><th>${t.prizeWinner}</th></tr></thead><tbody>${rows}</tbody></table>

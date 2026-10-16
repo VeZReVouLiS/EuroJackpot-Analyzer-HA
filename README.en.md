@@ -47,7 +47,7 @@ The panel adapts to the window size: on a big PC screen the letters, numbers and
 
 ### The country decides how the draw looks
 - **Greece** (like Allwyn): winners of all countries, winners in Greece and prize per class, including the **1 + 1** class that exists only in Greece.
-- **Germany** (like the official eurojackpot.com): *Class* (I–XII), *Match* (e.g. “5 numbers + 2 Euro numbers”), *Winners*, *Prize per winner* and the total sales. Below it, **“Where the winners are”** shows in which country and, for Germany, in which federal state the winners were found. The official source gives this information **for the top 3 classes only**.
+- **Germany** (like the official eurojackpot.com): *Class* (I–XII), *Match* (e.g. “5 + 2”), *Winners*, *Prize per winner* and the total sales. Below it, **“Where the winners are”** shows in which country and, for Germany, in which federal state the winners were found. The official source gives this information **for the top 3 classes only**.
 
 ![The panel with the German layout](docs/images/02-panel-germany-en.png)
 
