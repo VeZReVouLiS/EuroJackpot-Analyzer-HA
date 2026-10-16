@@ -51,6 +51,36 @@ The panel adapts to the window size: on a big PC screen the letters, numbers and
 
 ![The panel with the German layout](docs/images/02-panel-germany-en.png)
 
+## My tickets, analysis and sync
+The **My tickets** card (bottom right in the panel) shows your tickets, whether they were played, and their **result** as soon as the draw is out. The **Analysis** button opens the odds, expected cost/prize, a statistical profile of every column and a history check (what it would have won since 2012):
+
+![My tickets](docs/images/09-my-tickets-en.png)
+
+![Ticket analysis](docs/images/10-analysis-en.png)
+
+It is statistics for information, **not a prediction**: draws are random and every column has the same chances.
+
+**Tickets from the apps (Windows, Mac, Android, iPhone):** in the app go to Settings → Ticket sync and create a GitHub token (`gist` permission, the guide opens the right page). Then put the **same token** into Home Assistant: **Settings → Devices & services → EuroJackpot Analyzer → Configure → GitHub token**. The tickets sync through a private gist of your own account. Tickets you make in Home Assistant with “Save to my tickets” (or `save: true`) show up in the apps too. Without a token the card only shows what you saved here.
+
+## Notifications
+In the **options** (Configure) you can set:
+- **Notification service**, e.g. `notify.mobile_app_my_phone`. If empty, no notifications are sent (the events below are always fired).
+- **Jackpot alert from (million €)**: one notification per draw when the jackpot reaches the limit. `0` = off.
+- **GitHub token** for the ticket sync (optional).
+
+Notifications: a new draw with its numbers, a high jackpot and the **result of the tickets you played** (only when the draw is from the last 7 days). For your own automations there are the events:
+
+| Event | Content |
+|---|---|
+| `eurojackpot_analyzer_new_draw` | `date`, `numbers`, `euro_numbers`, `text`, `draw_number`, `jackpot_next` |
+| `eurojackpot_analyzer_jackpot_alert` | `jackpot`, `draw_time`, `threshold` |
+| `eurojackpot_analyzer_ticket_result` | `uid`, `date`, `winning_columns`, `total_prize`, `complete`, `tiers` |
+
+## About
+The **ⓘ About** button at the top right of the panel opens a guide, the data sources, credits and links (in the language you chose):
+
+![About](docs/images/11-about-en.png)
+
 ## Cards for your own dashboards
 The same screens are available as Lovelace cards. They are loaded automatically by the integration, with no resource setup:
 
@@ -58,7 +88,8 @@ The same screens are available as Lovelace cards. They are loaded automatically 
 |---|---|
 | `custom:eurojackpot-analyzer-last-draw-card` | last draw, jackpot, next draw with countdown, prize table (`show_prizes: false` to hide) |
 | `custom:eurojackpot-analyzer-stats-card` | overdue map and rankings |
-| `custom:eurojackpot-analyzer-ticket-card` | ticket generator (`columns`, `algorithm` set the initial values) |
+| `custom:eurojackpot-analyzer-ticket-card` | ticket generator (`columns`, `algorithm` set the initial values, `save: true` to save it to your tickets) |
+| `custom:eurojackpot-analyzer-my-tickets-card` | your tickets with results and analysis (`max_tickets`, default 6) |
 
 All accept `language: el`, `en` or `de` and `country: GR` or `DE` if you want a fixed language and layout. A ready-made dashboard example: [docs/dashboard.yaml](docs/dashboard.yaml).
 
@@ -74,6 +105,7 @@ All accept `language: el`, `en` or `de` and `country: GR` or `DE` if you want a 
 | `sensor.eurojackpot_analyzer_most_frequent_numbers` | the 5 most frequent numbers | `main` and `euro` with `count`, `percent` |
 | `sensor.eurojackpot_analyzer_least_frequent_numbers` | the 5 least frequent numbers | as above |
 | `sensor.eurojackpot_analyzer_generated_ticket` | columns of the last ticket | `columns`, `total_cost`, `algorithm`, `generated_at` |
+| `sensor.eurojackpot_analyzer_my_tickets` | number of tickets (synced and saved here) | `tickets` (each with `uid`, `target_date`, `played`, `columns`, `result`), `sync_enabled`, `synced_at` |
 
 Names are shown in Greek, English or German depending on the language of HA (entity IDs are always the English ones from the list).
 
@@ -87,6 +119,7 @@ Names are shown in Greek, English or German depending on the language of HA (ent
 | `columns` | 1-12 | 5 |
 | `algorithm` | `auto_ticket`, `auto_column`, `random`, `hot`, `cold`, `overdue`, `weighted`, `balanced`, `smart` | `auto_ticket` |
 | `period` | `all`, `10y`, `5y`, `3y`, `1y`, `last_100`, `last_50` | `all` |
+| `save` | `true`: adds the ticket to your tickets for the next draw (and to the sync gist when a token is set) | `false` |
 
 The response contains `columns` (each with `numbers`, `euro_numbers`, `algorithm`, `text`), `total_cost` and `price_per_column`.
 The result is also stored in `sensor.eurojackpot_analyzer_generated_ticket` and the event `eurojackpot_analyzer_ticket_generated` is fired.
@@ -103,6 +136,22 @@ response_variable: ticket
 ```
 
 ![Running the service](docs/images/06-service-en.png)
+
+## Services `eurojackpot_analyzer.analyze_ticket` and `sync_tickets`
+`analyze_ticket` returns the analysis (odds, expected cost/prize, profile and history check) for:
+- `numbers`: columns written as `5 12 23 34 45 + 3 7; 1 2 3 4 5 + 1 2` (separated by `;`), or
+- `uid`: a synced ticket (see `sensor.eurojackpot_analyzer_my_tickets`), or
+- nothing: the last generated ticket.
+
+`country` (default `GR`) sets the prize classes (`GR` adds the Greek 1 + 1).
+`sync_tickets` syncs with the gist right away (needs a token in the options).
+
+```yaml
+action: eurojackpot_analyzer.analyze_ticket
+data:
+  numbers: "5 12 23 34 45 + 3 7"
+response_variable: analysis
+```
 
 > Draws are random. Statistics do not improve your odds. Play responsibly (18+).
 
@@ -144,11 +193,11 @@ actions:
 ```
 
 ## Options
-**Settings → EuroJackpot Analyzer → Configure**: refresh interval (10-720 minutes, default 30) and price per column (default €2.50 for Greece; for Germany enter €2.00 per field plus the handling fee of the provider you play with).
+**Settings → EuroJackpot Analyzer → Configure**: refresh interval (10-720 minutes, default 30), price per column (default €2.50 for Greece; for Germany enter €2.00 per field plus the handling fee of the provider you play with), notification service, jackpot limit and GitHub token (see “Notifications” and “My tickets”).
 The sensors also refresh at 21:20, 21:50, 22:20, 22:50, 23:20 and 23:50, after the draw.
 
 ## For developers
-The shared core (`core/rules.py`, `core/stats.py`, `core/generators.py`) and the history (`data/draws.json`) are copied
+The shared core (`core/rules.py`, `core/stats.py`, `core/generators.py`, `core/evaluation.py`, `core/analysis.py`, `core/ticket_sync.py`, `core/tls.py`) and the history (`data/draws.json`) are copied
 automatically from [EuroJackpot-Analyzer](https://github.com/VeZReVouLiS/EuroJackpot-Analyzer) (`tools/sync_ha.ps1`). Do not
 edit them here.
 

@@ -51,6 +51,36 @@
 
 ![Το panel με προβολή Γερμανίας](docs/images/02-panel-germany.png)
 
+## Τα δελτία μου, ανάλυση και συγχρονισμός
+Η κάρτα **Τα δελτία μου** (κάτω δεξιά στο panel) δείχνει τα δελτία σου, αν έπαιξαν, και το **αποτέλεσμα** μόλις βγει η κλήρωση τους. Το κουμπί **Ανάλυση** ανοίγει πιθανότητες, αναμενόμενο κόστος/κέρδος, στατιστικό προφίλ κάθε στήλης και έλεγχο στο ιστορικό (τι θα είχε κερδίσει από το 2012):
+
+![Τα δελτία μου](docs/images/09-my-tickets.png)
+
+![Ανάλυση δελτίου](docs/images/10-analysis.png)
+
+Είναι στατιστική ενημέρωση, **όχι πρόβλεψη**: η κλήρωση είναι τυχαία και κάθε στήλη έχει τις ίδιες πιθανότητες.
+
+**Δελτία από τις εφαρμογές (Windows, Mac, Android, iPhone):** στην εφαρμογή πήγαινε στις Ρυθμίσεις → Συγχρονισμός δελτίων και φτιάξε ένα token GitHub (δικαίωμα `gist`, ο οδηγός ανοίγει την κατάλληλη σελίδα). Μετά βάλε το **ίδιο token** στο Home Assistant: **Ρυθμίσεις → Συσκευές και υπηρεσίες → EuroJackpot Analyzer → Ρύθμιση → Token GitHub**. Τα δελτία συγχρονίζονται μέσω ιδιωτικού gist του δικού σου λογαριασμού. Δελτία που φτιάχνεις στο Home Assistant με «Αποθήκευση στα δελτία μου» (ή `save: true`) εμφανίζονται και στις εφαρμογές. Χωρίς token η κάρτα δείχνει μόνο όσα αποθήκευσες εδώ.
+
+## Ειδοποιήσεις
+Στις **Επιλογές** (Ρύθμιση) μπορείς να ορίσεις:
+- **Υπηρεσία ειδοποιήσεων**, π.χ. `notify.mobile_app_to_kinito_mou`. Αν μείνει κενή, δεν στέλνονται ειδοποιήσεις (τα γεγονότα παρακάτω στέλνονται πάντα).
+- **Ειδοποίηση τζάκποτ από (εκατ. €)**: μία ειδοποίηση ανά κλήρωση όταν το τζάκποτ φτάσει το όριο. `0` = ανενεργή.
+- **Token GitHub** για τον συγχρονισμό δελτίων (προαιρετικό).
+
+Ειδοποιήσεις: νέα κλήρωση με τους αριθμούς, υψηλό τζάκποτ και το **αποτέλεσμα των δελτίων που έπαιξες** (μόνο όταν η κλήρωση είναι των τελευταίων 7 ημερών). Για δικούς σου αυτοματισμούς υπάρχουν τα γεγονότα:
+
+| Γεγονός | Περιεχόμενο |
+|---|---|
+| `eurojackpot_analyzer_new_draw` | `date`, `numbers`, `euro_numbers`, `text`, `draw_number`, `jackpot_next` |
+| `eurojackpot_analyzer_jackpot_alert` | `jackpot`, `draw_time`, `threshold` |
+| `eurojackpot_analyzer_ticket_result` | `uid`, `date`, `winning_columns`, `total_prize`, `complete`, `tiers` |
+
+## Σχετικά
+Το κουμπί **ⓘ Σχετικά** πάνω δεξιά στο panel ανοίγει οδηγίες χρήσης, πηγές δεδομένων, credits και συνδέσμους (στη γλώσσα που διάλεξες):
+
+![Σχετικά](docs/images/11-about.png)
+
 ## Κάρτες για τα δικά σου dashboards
 Οι ίδιες οθόνες είναι διαθέσιμες και ως κάρτες Lovelace. Φορτώνονται αυτόματα από το integration, χωρίς καμία ρύθμιση πόρων:
 
@@ -58,7 +88,8 @@
 |---|---|
 | `custom:eurojackpot-analyzer-last-draw-card` | τελευταία κλήρωση, τζάκποτ, επόμενη κλήρωση, πίνακας κερδών (`show_prizes: false` για να κρυφτεί) |
 | `custom:eurojackpot-analyzer-stats-card` | χάρτης καθυστέρησης και κατατάξεις |
-| `custom:eurojackpot-analyzer-ticket-card` | γεννήτρια δελτίου (`columns`, `algorithm` για τις αρχικές τιμές) |
+| `custom:eurojackpot-analyzer-ticket-card` | γεννήτρια δελτίου (`columns`, `algorithm` για τις αρχικές τιμές, `save: true` για να αποθηκεύεται στα δελτία σου) |
+| `custom:eurojackpot-analyzer-my-tickets-card` | τα δελτία σου με αποτελέσματα και ανάλυση (`max_tickets`, προεπιλογή 6) |
 
 Όλες δέχονται `language: el`, `en` ή `de` και `country: GR` ή `DE` αν θέλεις σταθερή γλώσσα και προβολή. Έτοιμο παράδειγμα dashboard: [docs/dashboard.yaml](docs/dashboard.yaml).
 
@@ -74,6 +105,7 @@
 | `sensor.eurojackpot_analyzer_most_frequent_numbers` | οι 5 συχνότεροι αριθμοί | `main` και `euro` με `count`, `percent` |
 | `sensor.eurojackpot_analyzer_least_frequent_numbers` | οι 5 σπανιότεροι αριθμοί | όπως παραπάνω |
 | `sensor.eurojackpot_analyzer_generated_ticket` | στήλες του τελευταίου δελτίου | `columns`, `total_cost`, `algorithm`, `generated_at` |
+| `sensor.eurojackpot_analyzer_my_tickets` | πλήθος δελτίων (συγχρονισμένα και αποθηκευμένα εδώ) | `tickets` (κάθε δελτίο με `uid`, `target_date`, `played`, `columns`, `result`), `sync_enabled`, `synced_at` |
 
 Τα ονόματα εμφανίζονται στα ελληνικά ή στα αγγλικά ανάλογα με τη γλώσσα του HA (τα entity IDs είναι πάντα τα αγγλικά της λίστας).
 
@@ -85,6 +117,7 @@
 | `columns` | 1-12 | 5 |
 | `algorithm` | `auto_ticket`, `auto_column`, `random`, `hot`, `cold`, `overdue`, `weighted`, `balanced`, `smart` | `auto_ticket` |
 | `period` | `all`, `10y`, `5y`, `3y`, `1y`, `last_100`, `last_50` | `all` |
+| `save` | `true`: προσθέτει το δελτίο στα δελτία σου για την επόμενη κλήρωση (και στο gist συγχρονισμού αν υπάρχει token) | `false` |
 
 Η απάντηση περιέχει `columns` (κάθε στήλη με `numbers`, `euro_numbers`, `algorithm`, `text`), `total_cost` και `price_per_column`.
 Το αποτέλεσμα αποθηκεύεται και στο `sensor.eurojackpot_analyzer_generated_ticket` και στέλνεται το event `eurojackpot_analyzer_ticket_generated`.
@@ -101,6 +134,22 @@ response_variable: ticket
 ```
 
 ![Εκτέλεση του service](docs/images/06-service.png)
+
+## Services `eurojackpot_analyzer.analyze_ticket` και `sync_tickets`
+`analyze_ticket` επιστρέφει την ανάλυση (πιθανότητες, αναμενόμενο κόστος/κέρδος, προφίλ και έλεγχο ιστορικού) για:
+- `numbers`: στήλες γραμμένες ως `5 12 23 34 45 + 3 7; 1 2 3 4 5 + 1 2` (χωρισμένες με `;`), ή
+- `uid`: ένα συγχρονισμένο δελτίο (βλ. το `sensor.eurojackpot_analyzer_my_tickets`), ή
+- τίποτα: το τελευταίο δελτίο που δημιουργήθηκε.
+
+Το `country` (προεπιλογή `GR`) ορίζει τις κατηγορίες κερδών (το `GR` προσθέτει την ελληνική 1 + 1).
+`sync_tickets` συγχρονίζει αμέσως με το gist (χρειάζεται token στις Επιλογές).
+
+```yaml
+action: eurojackpot_analyzer.analyze_ticket
+data:
+  numbers: "5 12 23 34 45 + 3 7"
+response_variable: analysis
+```
 
 > Η κλήρωση είναι τυχαία. Τα στατιστικά δεν αυξάνουν τις πιθανότητες νίκης. Παίξε υπεύθυνα (18+).
 
@@ -142,11 +191,11 @@ actions:
 ```
 
 ## Επιλογές
-**Ρυθμίσεις → EuroJackpot Analyzer → Ρύθμιση**: συχνότητα ανανέωσης (10-720 λεπτά, προεπιλογή 30) και τιμή ανά στήλη (προεπιλογή 2,50 € για Ελλάδα· για Γερμανία βάλε 2,00 € ανά πεδίο συν την προμήθεια του παρόχου σου).
+**Ρυθμίσεις → EuroJackpot Analyzer → Ρύθμιση**: συχνότητα ανανέωσης (10-720 λεπτά, προεπιλογή 30), τιμή ανά στήλη (προεπιλογή 2,50 € για Ελλάδα· για Γερμανία βάλε 2,00 € ανά πεδίο συν την προμήθεια του παρόχου σου), υπηρεσία ειδοποιήσεων, όριο τζάκποτ και token GitHub (βλ. «Ειδοποιήσεις» και «Τα δελτία μου»).
 Οι αισθητήρες ανανεώνονται επιπλέον στις 21:20, 21:50, 22:20, 22:50, 23:20 και 23:50, μετά την κλήρωση.
 
 ## Για προγραμματιστές
-Ο κοινός πυρήνας (`core/rules.py`, `core/stats.py`, `core/generators.py`) και το ιστορικό (`data/draws.json`) αντιγράφονται
+Ο κοινός πυρήνας (`core/rules.py`, `core/stats.py`, `core/generators.py`, `core/evaluation.py`, `core/analysis.py`, `core/ticket_sync.py`, `core/tls.py`) και το ιστορικό (`data/draws.json`) αντιγράφονται
 αυτόματα από το [EuroJackpot-Analyzer](https://github.com/VeZReVouLiS/EuroJackpot-Analyzer) (`tools/sync_ha.ps1`). Μην τα
 αλλάζεις εδώ.
 
