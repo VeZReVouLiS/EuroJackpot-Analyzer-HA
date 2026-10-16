@@ -12,7 +12,7 @@
  * eurojackpot.com style); language (el / en / de) decides the texts. Both are chosen in the panel, remembered
  * in this browser, and can be fixed on a card with `country:` / `language:`.
  */
-const EJ_VERSION = "0.4.3";
+const EJ_VERSION = "0.4.4";
 const DOMAIN = "eurojackpot_analyzer";
 const ASSETS = window.EJ_ASSETS || `/${DOMAIN}/assets`;     // EJ_ASSETS: only the offline preview sets it
 const ID = {
@@ -62,7 +62,7 @@ const TEXT = {
     generating: "Δημιουργία…", disclaimer: "Η κλήρωση είναι τυχαία· τα στατιστικά δεν αυξάνουν τις πιθανότητες. Παίξε υπεύθυνα (18+).",
     refresh: "Ανανέωση", language: "Γλώσσα", country: "Χώρα", panelSub: "Κληρώσεις · Στατιστικά · Δελτία",
     algos: {
-      auto_ticket: "Αυτόματος – ένας ανά δελτίο", auto_column: "Αυτόματος – ένας ανά στήλη", random: "Καθαρά τυχαίος",
+      auto_ticket: "Αυτόματος - ένας ανά δελτίο", auto_column: "Αυτόματος - ένας ανά στήλη", random: "Καθαρά τυχαίος",
       hot: "Συχνοί (hot)", cold: "Σπάνιοι (cold)", overdue: "Καθυστερημένοι", weighted: "Σταθμισμένος",
       balanced: "Ισορροπημένος", smart: "Έξυπνη κατανομή",
     },
@@ -86,7 +86,7 @@ const TEXT = {
     generating: "Generating…", disclaimer: "Draws are random; statistics do not improve your odds. Play responsibly (18+).",
     refresh: "Refresh", language: "Language", country: "Country", panelSub: "Draws · Statistics · Tickets",
     algos: {
-      auto_ticket: "Automatic – one per ticket", auto_column: "Automatic – one per column", random: "Pure random",
+      auto_ticket: "Automatic - one per ticket", auto_column: "Automatic - one per column", random: "Pure random",
       hot: "Hot numbers", cold: "Cold numbers", overdue: "Overdue numbers", weighted: "Frequency-weighted",
       balanced: "Balanced", smart: "Smart shape",
     },
@@ -110,7 +110,7 @@ const TEXT = {
     generating: "Wird erstellt …", disclaimer: "Die Ziehung ist zufällig; Statistiken erhöhen die Gewinnchancen nicht. Spiele verantwortungsvoll (ab 18).",
     refresh: "Aktualisieren", language: "Sprache", country: "Land", panelSub: "Ziehungen · Statistik · Spielscheine",
     algos: {
-      auto_ticket: "Automatisch – einer pro Schein", auto_column: "Automatisch – einer pro Feld", random: "Reiner Zufall",
+      auto_ticket: "Automatisch - einer pro Schein", auto_column: "Automatisch - einer pro Feld", random: "Reiner Zufall",
       hot: "Heiße Zahlen", cold: "Kalte Zahlen", overdue: "Überfällige Zahlen", weighted: "Nach Häufigkeit gewichtet",
       balanced: "Ausgewogen", smart: "Intelligentes Muster",
     },
@@ -322,15 +322,15 @@ class EJLastDrawCard extends EJBase {
     if (this.countryInfo && this.countryInfo.layout === "official") {      // as on the official eurojackpot.com page
       const rows = prizes.filter((p) => p.tier !== "1+1").map((p, i) => `<tr class="${p.winners_all_countries > 0 ? "gr" : ""}"><td>${ROMAN[i] || i + 1}</td><td>${esc(this.matchText(p.tier))}</td>
         <td class="nw">${p.winners_all_countries ? `${this.fmtN(p.winners_all_countries)} ×` : `<span class="sub">${t.noWinner}</span>`}</td>
-        <td class="nw">${p.prize_per_winner > 0 ? this.fmtMoney(p.prize_per_winner) : "—"}</td></tr>`).join("");
+        <td class="nw">${p.prize_per_winner > 0 ? this.fmtMoney(p.prize_per_winner) : "-"}</td></tr>`).join("");
       table = `<table class="off"><thead><tr><th>${t.cls}</th><th>${t.match}</th><th>${t.winnersN}</th><th>${t.prizeWinner}</th></tr></thead><tbody>${rows}</tbody></table>
         ${a.total_sales ? `<div class="note">${t.sales}: <b>${this.fmtMoney(a.total_sales)}</b>${a.columns_all_countries ? ` · ${this.fmtN(a.columns_all_countries)} ${t.columns.toLowerCase()}` : ""}</div>` : ""}`;
     } else {                                                                // Greek (Allwyn) layout
       const rows = prizes.map((p) => {
         const gr = p.winners_greece, greekOnly = p.tier === "1+1";
         return `<tr class="${gr > 0 ? "gr" : ""}"><td>${esc(p.tier.replace("+", " + "))}${greekOnly ? `<span class="tag">${t.greekOnly}</span>` : ""}</td>
-          <td>${greekOnly ? "—" : this.fmtN(p.winners_all_countries)}</td><td>${gr == null ? "—" : this.fmtN(gr)}</td>
-          <td>${p.prize_per_winner > 0 ? this.fmtMoney(p.prize_per_winner) : "—"}</td></tr>`;
+          <td>${greekOnly ? "-" : this.fmtN(p.winners_all_countries)}</td><td>${gr == null ? "-" : this.fmtN(gr)}</td>
+          <td>${p.prize_per_winner > 0 ? this.fmtMoney(p.prize_per_winner) : "-"}</td></tr>`;
       }).join("");
       table = `<table><thead><tr><th>${t.tier}</th><th>${t.winners}</th><th>${t.greece}</th><th>${t.prize}</th></tr></thead><tbody>${rows}</tbody></table>
         ${a.columns_greece ? `<div class="note">${this.fmtN(a.columns_greece)} ${t.columnsGr}</div>` : ""}`;
@@ -585,9 +585,9 @@ class EJPanel extends HTMLElement {
 }
 
 const CARDS = [
-  ["eurojackpot-analyzer-last-draw-card", EJLastDrawCard, "EuroJackpot Analyzer – Τελευταία κλήρωση / Last draw", "Last draw numbers, jackpot, next draw with countdown and prizes."],
-  ["eurojackpot-analyzer-stats-card", EJStatsCard, "EuroJackpot Analyzer – Στατιστικά / Statistics", "Overdue heat-map of the 50 numbers and rankings."],
-  ["eurojackpot-analyzer-ticket-card", EJTicketCard, "EuroJackpot Analyzer – Δελτίο / Ticket", "Ticket generator with 1-12 columns."],
+  ["eurojackpot-analyzer-last-draw-card", EJLastDrawCard, "EuroJackpot Analyzer - Τελευταία κλήρωση / Last draw", "Last draw numbers, jackpot, next draw with countdown and prizes."],
+  ["eurojackpot-analyzer-stats-card", EJStatsCard, "EuroJackpot Analyzer - Στατιστικά / Statistics", "Overdue heat-map of the 50 numbers and rankings."],
+  ["eurojackpot-analyzer-ticket-card", EJTicketCard, "EuroJackpot Analyzer - Δελτίο / Ticket", "Ticket generator with 1-12 columns."],
 ];
 window.customCards = window.customCards || [];
 for (const [tag, cls, name, description] of CARDS) {

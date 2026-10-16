@@ -37,7 +37,7 @@
       "name": "Generate ticket",
       "description": "Generates a ticket of 1 to 12 columns (5 numbers + 2 Euro numbers each) using the number statistics, and returns the columns and the total cost.",
       "fields": {
-        "columns": { "name": "Columns", "description": "Number of columns (1–12)." },
+        "columns": { "name": "Columns", "description": "Number of columns (1-12)." },
         "algorithm": { "name": "Algorithm", "description": "How the numbers are chosen. The automatic options pick a random algorithm per ticket or per column." },
         "period": { "name": "Period", "description": "The part of the history the statistics are based on." }
       }
@@ -46,8 +46,8 @@
   "selector": {
     "algorithm": {
       "options": {
-        "auto_ticket": "Automatic – one random algorithm per ticket",
-        "auto_column": "Automatic – random algorithm per column",
+        "auto_ticket": "Automatic - one random algorithm per ticket",
+        "auto_column": "Automatic - random algorithm per column",
         "random": "Pure random",
         "hot": "Hot numbers",
         "cold": "Cold numbers",

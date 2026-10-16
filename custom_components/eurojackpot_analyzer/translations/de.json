@@ -13,7 +13,7 @@
   "options": {
     "step": {
       "init": {
-        "title": "EuroJackpot Analyzer – Optionen",
+        "title": "EuroJackpot Analyzer - Optionen",
         "data": {
           "scan_interval": "Aktualisierungsintervall (Minuten)",
           "price_per_column": "Preis pro Feld (€)"
@@ -53,7 +53,7 @@
       "fields": {
         "columns": {
           "name": "Felder",
-          "description": "Anzahl der Felder (1–12)."
+          "description": "Anzahl der Felder (1-12)."
         },
         "algorithm": {
           "name": "Algorithmus",
@@ -69,8 +69,8 @@
   "selector": {
     "algorithm": {
       "options": {
-        "auto_ticket": "Automatisch – ein zufälliger Algorithmus pro Schein",
-        "auto_column": "Automatisch – zufälliger Algorithmus pro Feld",
+        "auto_ticket": "Automatisch - ein zufälliger Algorithmus pro Schein",
+        "auto_column": "Automatisch - zufälliger Algorithmus pro Feld",
         "random": "Reiner Zufall",
         "hot": "Heiße Zahlen",
         "cold": "Kalte Zahlen",

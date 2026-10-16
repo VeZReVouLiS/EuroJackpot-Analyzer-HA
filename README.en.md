@@ -7,7 +7,7 @@ EuroJackpot in Home Assistant, with its own **sidebar panel** that fills the who
 - **Last draw**: numbers, winners and prizes per class and the **big jackpot**, **the way they are presented in your country** (Greece or Germany), and where the prizes were won.
 - **Next draw** with date/time and a countdown `DD : HH : MM : SS`.
 - **Overdue map** of the 50 numbers with colours, and rankings: most overdue, most frequent, least frequent.
-- **Ticket generator** of 1–12 columns with 7 algorithms or automatic choice, with the total cost (price per column is editable, default €2.50).
+- **Ticket generator** of 1-12 columns with 7 algorithms or automatic choice, with the total cost (price per column is editable, default €2.50).
 - **Greek / English / German** and a **country selector**, both in flag menus. A change applies instantly.
 
 No account and no API key needed. The data comes from Allwyn and the official EuroJackpot service.
@@ -47,7 +47,7 @@ The panel adapts to the window size: on a big PC screen the letters, numbers and
 
 ### The country decides how the draw looks
 - **Greece** (like Allwyn): winners of all countries, winners in Greece and prize per class, including the **1 + 1** class that exists only in Greece.
-- **Germany** (like the official eurojackpot.com): *Class* (I–XII), *Match* (e.g. “5 + 2”), *Winners*, *Prize per winner* and the total sales. Below it, **“Where the winners are”** shows in which country and, for Germany, in which federal state the winners were found. The official source gives this information **for the top 3 classes only**.
+- **Germany** (like the official eurojackpot.com): *Class* (I-XII), *Match* (e.g. “5 + 2”), *Winners*, *Prize per winner* and the total sales. Below it, **“Where the winners are”** shows in which country and, for Germany, in which federal state the winners were found. The official source gives this information **for the top 3 classes only**.
 
 ![The panel with the German layout](docs/images/02-panel-germany-en.png)
 
@@ -84,7 +84,7 @@ Names are shown in Greek, English or German depending on the language of HA (ent
 ## Service `eurojackpot_analyzer.generate_ticket`
 | Field | Values | Default |
 |---|---|---|
-| `columns` | 1–12 | 5 |
+| `columns` | 1-12 | 5 |
 | `algorithm` | `auto_ticket`, `auto_column`, `random`, `hot`, `cold`, `overdue`, `weighted`, `balanced`, `smart` | `auto_ticket` |
 | `period` | `all`, `10y`, `5y`, `3y`, `1y`, `last_100`, `last_50` | `all` |
 
@@ -144,7 +144,7 @@ actions:
 ```
 
 ## Options
-**Settings → EuroJackpot Analyzer → Configure**: refresh interval (10–720 minutes, default 30) and price per column (default €2.50 for Greece; for Germany enter €2.00 per field plus the handling fee of the provider you play with).
+**Settings → EuroJackpot Analyzer → Configure**: refresh interval (10-720 minutes, default 30) and price per column (default €2.50 for Greece; for Germany enter €2.00 per field plus the handling fee of the provider you play with).
 The sensors also refresh at 21:20, 21:50, 22:20, 22:50, 23:20 and 23:50, after the draw.
 
 ## For developers
