@@ -18,3 +18,4 @@ views:
           - type: custom:eurojackpot-analyzer-ticket-card
             columns: 5
             algorithm: auto_column
+          - type: custom:eurojackpot-analyzer-my-tickets-card
