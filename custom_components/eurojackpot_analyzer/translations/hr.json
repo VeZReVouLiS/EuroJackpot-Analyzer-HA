@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Dodaje zadnje izvlačenje, sljedeće izvlačenje i jackpot, statistiku brojeva i generator listića. Podaci dolaze od Allwyna i službenog EuroJackpot servisa. Račun nije potreban."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer je već postavljen."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcije za EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Interval osvježavanja (minute)",
+          "price_per_column": "Cijena po kombinaciji (€)",
+          "notify_service": "Servis za obavijesti (npr. notify.mobile_app_my_phone, prazno = nijedan)",
+          "jackpot_threshold": "Upozorenje o jackpotu od (milijuna €, 0 = isključeno)",
+          "github_token": "GitHub token za čitanje sinkroniziranih listića (neobavezno)"
+        },
+        "description": "Upozorenja o novim izvlačenjima, visokom jackpotu i rezultatima tvojih listića. Token (dozvola: gist) isti je kao onaj koji koristiš u aplikaciji za sinkronizaciju listića."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Zadnje izvlačenje"
+      },
+      "next_draw": {
+        "name": "Sljedeće izvlačenje"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Najdulje neizvučeni brojevi"
+      },
+      "frequent_numbers": {
+        "name": "Najčešći brojevi"
+      },
+      "rare_numbers": {
+        "name": "Najrjeđi brojevi"
+      },
+      "generated_ticket": {
+        "name": "Generirani listić"
+      },
+      "my_tickets": {
+        "name": "Moji listići"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Generiraj listić",
+      "description": "Generira listić od 1 do 12 kombinacija (svaka s 5 brojeva + 2 Euro broja) na temelju statistike brojeva i vraća kombinacije i ukupnu cijenu.",
+      "fields": {
+        "columns": {
+          "name": "Kombinacije",
+          "description": "Broj kombinacija (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritam",
+          "description": "Kako se biraju brojevi. Automatske opcije biraju nasumični algoritam po listiću ili po kombinaciji."
+        },
+        "period": {
+          "name": "Razdoblje",
+          "description": "Dio povijesti na kojem se temelji statistika."
+        },
+        "save": {
+          "name": "Spremi kao listić",
+          "description": "Dodaj listić u Moje listiće za sljedeće izvlačenje (i u tvoj gist za sinkronizaciju kad je postavljen token)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analiziraj listić",
+      "description": "Točne vjerojatnosti dobitka, očekivani dobitak i provjera povijesti za listić. To je statistika, a ne predviđanje: svaka kombinacija ima istu šansu.",
+      "fields": {
+        "numbers": {
+          "name": "Brojevi",
+          "description": "Kombinacije poput '5 12 23 34 45 + 3 7', odvojene znakom ';'. Ostavi prazno da se koristi sinkronizirani listić (uid) ili zadnji generirani listić."
+        },
+        "uid": {
+          "name": "Uid listića",
+          "description": "Uid sinkroniziranog listića (vidi senzor Moji listići)."
+        },
+        "country": {
+          "name": "Zemlja",
+          "description": "Kod zemlje za razrede dobitaka (GR dodaje grčki razred 1+1)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Sinkroniziraj listiće",
+      "description": "Odmah spaja listiće s tvojim privatnim gistom za sinkronizaciju na GitHubu (potreban je token u opcijama)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatski - jedan nasumični algoritam po listiću",
+        "auto_column": "Automatski - nasumični algoritam po kombinaciji",
+        "random": "Čisto nasumično",
+        "hot": "Vrući brojevi",
+        "cold": "Hladni brojevi",
+        "overdue": "Zakašnjeli brojevi",
+        "weighted": "Prema učestalosti",
+        "balanced": "Uravnoteženo (vrući + zakašnjeli)",
+        "smart": "Pametan oblik (neparni/parni, zbroj)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Sva izvlačenja",
+        "10y": "Zadnjih 10 godina",
+        "5y": "Zadnjih 5 godina",
+        "3y": "Zadnje 3 godine",
+        "1y": "Zadnja godina",
+        "last_100": "Zadnjih 100 izvlačenja",
+        "last_50": "Zadnjih 50 izvlačenja"
+      }
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Lisab viimase loosimise, järgmise loosimise ja jackpoti, numbristatistika ning piletigeneraatori. Andmed pärinevad Allwynilt ja ametlikult EuroJackpoti teenuselt. Kontot pole vaja."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer on juba seadistatud."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "EuroJackpot Analyzeri valikud",
+        "data": {
+          "scan_interval": "Värskendusintervall (minutit)",
+          "price_per_column": "Rea hind (€)",
+          "notify_service": "Teavitusteenus (nt notify.mobile_app_my_phone, tühi = puudub)",
+          "jackpot_threshold": "Jackpoti teavitus alates (miljonit €, 0 = väljas)",
+          "github_token": "GitHubi token sünkroonitud piletite lugemiseks (valikuline)"
+        },
+        "description": "Teavitused uute loosimiste, suure jackpoti ja su piletite tulemuste kohta. Token (õigus: gist) on sama, mida kasutad rakenduses piletite sünkroonimiseks."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Viimane loosimine"
+      },
+      "next_draw": {
+        "name": "Järgmine loosimine"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Kõige hilinenumad numbrid"
+      },
+      "frequent_numbers": {
+        "name": "Kõige sagedasemad numbrid"
+      },
+      "rare_numbers": {
+        "name": "Kõige harvemad numbrid"
+      },
+      "generated_ticket": {
+        "name": "Genereeritud pilet"
+      },
+      "my_tickets": {
+        "name": "Minu piletid"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Genereeri pilet",
+      "description": "Genereerib numbristatistika põhjal 1-12 reaga pileti (igaühel 5 numbrit + 2 Euronumbrit) ning tagastab read ja kogu hinna.",
+      "fields": {
+        "columns": {
+          "name": "Read",
+          "description": "Ridade arv (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritm",
+          "description": "Kuidas numbrid valitakse. Automaatsed valikud võtavad juhusliku algoritmi pileti või rea kohta."
+        },
+        "period": {
+          "name": "Periood",
+          "description": "Ajaloo osa, millel statistika põhineb."
+        },
+        "save": {
+          "name": "Salvesta piletina",
+          "description": "Lisa pilet jaotisse Minu piletid järgmiseks loosimiseks (ja sinu sünkroonimisgisti, kui token on määratud)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analüüsi pilet",
+      "description": "Täpsed võidutõenäosused, oodatav võit ja ajaloo kontroll piletile. See on statistika, mitte ennustus: igal real on sama võimalus.",
+      "fields": {
+        "numbers": {
+          "name": "Numbrid",
+          "description": "Read kujul '5 12 23 34 45 + 3 7', eraldatud märgiga ';'. Jäta tühjaks, et kasutada sünkroonitud piletit (uid) või viimati genereeritud piletit."
+        },
+        "uid": {
+          "name": "Pileti uid",
+          "description": "Sünkroonitud pileti uid (vaata anduri Minu piletid)."
+        },
+        "country": {
+          "name": "Riik",
+          "description": "Riigi kood võiduklasside jaoks (GR lisab Kreeka 1+1 klassi)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Sünkrooni piletid",
+      "description": "Ühendab piletid sinu privaatse sünkroonimisgistiga GitHubis kohe (vajab valikutes tokenit)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automaatne - üks juhuslik algoritm pileti kohta",
+        "auto_column": "Automaatne - juhuslik algoritm rea kohta",
+        "random": "Puhas juhuslikkus",
+        "hot": "Kuumad numbrid",
+        "cold": "Külmad numbrid",
+        "overdue": "Hilinenud numbrid",
+        "weighted": "Sageduse järgi kaalutud",
+        "balanced": "Tasakaalustatud (kuumad + hilinenud)",
+        "smart": "Nutikas kuju (paaritu/paaris, summa)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Kõik loosimised",
+        "10y": "Viimased 10 aastat",
+        "5y": "Viimased 5 aastat",
+        "3y": "Viimased 3 aastat",
+        "1y": "Viimane aasta",
+        "last_100": "Viimased 100 loosimist",
+        "last_50": "Viimased 50 loosimist"
+      }
+    }
+  }
+}

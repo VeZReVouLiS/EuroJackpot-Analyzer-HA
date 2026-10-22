@@ -135,6 +135,14 @@ class EuroJackpotCoordinator(DataUpdateCoordinator[dict]):
                 self.rows = logic.merge_draws(self.rows, new)
                 await self._draws_store.async_save({"draws": self.rows})
                 changed = True
+            elif last["date"] == self.rows[-1][0]:
+                # the prizes of a draw are published after its numbers: keep the table of the newest draw up to date
+                prizes = logic.prizes_of(last)
+                row = self.rows[-1]
+                if prizes and (row[3] if len(row) > 3 else None) != prizes:
+                    self.rows = logic.merge_draws(self.rows, [last])
+                    await self._draws_store.async_save({"draws": self.rows})
+                    changed = True
         latest_stored = self.rows[-1][0]
         if changed or self._tops is None or self._stats_for != latest_stored:
             st = await self.hass.async_add_executor_job(logic.compute_stats, self.rows, "all")
@@ -198,15 +206,19 @@ class EuroJackpotCoordinator(DataUpdateCoordinator[dict]):
             self.hass.bus.async_fire(f"{DOMAIN}_jackpot_alert", {"jackpot": nxt["jackpot"], "draw_time": key, "threshold": threshold})
             await self._notify(tk.text(lang, "jackpot", amount=f"{nxt['jackpot'] / 1_000_000:g}", date=key[:10]))
         reported = set(self.state.get("reported", []))
-        for item in tk.pending_results(self.tickets, self.rows, reported):
+        sigs = self.state.setdefault("sigs", {})
+        for item in tk.pending_results(self.tickets, self.rows, reported, sigs):
             reported.add(item["key"])
+            sigs[item["key"]] = item["sig"]
             res = item["result"]
-            self.state.setdefault("results", {})[item["uid"]] = {
-                "date": item["date"], "winning_columns": res["winning_columns"], "total_prize": res["total_prize"],
-                "complete": res["complete"], "tiers": [c["tier"] for c in res["columns"]]}
+            old = self.state.get("results", {}).get(item["uid"])
+            new = {"date": item["date"], "winning_columns": res["winning_columns"], "total_prize": res["total_prize"],
+                   "complete": res["complete"], "tiers": [c["tier"] for c in res["columns"]]}
+            self.state.setdefault("results", {})[item["uid"]] = new
             dirty = True
-            if (dt_util.now().date() - date.fromisoformat(item["date"])).days <= RESULT_WINDOW_DAYS:
-                self.hass.bus.async_fire(f"{DOMAIN}_ticket_result", {"uid": item["uid"], **self.state["results"][item["uid"]]})
+            news = old is None or (old["date"], old["winning_columns"], old["total_prize"]) != (new["date"], new["winning_columns"], new["total_prize"])
+            if news and (dt_util.now().date() - date.fromisoformat(item["date"])).days <= RESULT_WINDOW_DAYS:
+                self.hass.bus.async_fire(f"{DOMAIN}_ticket_result", {"uid": item["uid"], **new})
                 await self._notify(tk.result_message(lang, item))
         if dirty:
             self.state["reported"] = sorted(reported)

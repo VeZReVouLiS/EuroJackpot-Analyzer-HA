@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Lisää viimeisimmän ja seuraavan arvonnan, jackpotin, numeroiden tilastot ja kuponkigeneraattorin. Tiedot tulevat Allwynilta ja virallisesta EuroJackpot-palvelusta. Tiliä ei tarvita."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer on jo otettu käyttöön."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "EuroJackpot Analyzerin asetukset",
+        "data": {
+          "scan_interval": "Päivitysväli (minuuttia)",
+          "price_per_column": "Rivin hinta (€)",
+          "notify_service": "Ilmoituspalvelu (esim. notify.mobile_app_my_phone, tyhjä = ei mitään)",
+          "jackpot_threshold": "Jackpot-hälytys alkaen (miljoonaa €, 0 = pois)",
+          "github_token": "GitHub-token synkronoitujen kuponkien lukemiseen (valinnainen)"
+        },
+        "description": "Hälytykset uusista arvonnoista, korkeasta jackpotista ja kuponkiesi tuloksista. Token (oikeus: gist) on sama, jota käytät sovelluksessa kuponkien synkronointiin."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Viimeisin arvonta"
+      },
+      "next_draw": {
+        "name": "Seuraava arvonta"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Eniten myöhässä olevat numerot"
+      },
+      "frequent_numbers": {
+        "name": "Yleisimmät numerot"
+      },
+      "rare_numbers": {
+        "name": "Harvinaisimmat numerot"
+      },
+      "generated_ticket": {
+        "name": "Luotu kuponki"
+      },
+      "my_tickets": {
+        "name": "Kuponkini"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Luo kuponki",
+      "description": "Luo 1-12 rivin kupongin (kullakin 5 numeroa + 2 tähtinumeroa) numeroiden tilastojen avulla ja palauttaa rivit ja kokonaishinnan.",
+      "fields": {
+        "columns": {
+          "name": "Rivit",
+          "description": "Rivien määrä (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritmi",
+          "description": "Miten numerot valitaan. Automaattiset vaihtoehdot valitsevat satunnaisen algoritmin per kuponki tai per rivi."
+        },
+        "period": {
+          "name": "Ajanjakso",
+          "description": "Historian osa, johon tilastot perustuvat."
+        },
+        "save": {
+          "name": "Tallenna kuponkina",
+          "description": "Lisää kuponki kohtaan Kuponkini seuraavaa arvontaa varten (ja synkronointigistiisi, kun token on asetettu)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analysoi kuponki",
+      "description": "Tarkat voittotodennäköisyydet, odotettu voitto ja historiatarkistus kupongille. Kyse on tilastoista, ei ennusteesta: jokaisella rivillä on sama mahdollisuus.",
+      "fields": {
+        "numbers": {
+          "name": "Numerot",
+          "description": "Rivit muodossa '5 12 23 34 45 + 3 7', eroteltuna merkillä ';'. Jätä tyhjäksi käyttääksesi synkronoitua kuponkia (uid) tai viimeksi luotua kuponkia."
+        },
+        "uid": {
+          "name": "Kupongin uid",
+          "description": "Synkronoidun kupongin uid (katso Kuponkini-anturi)."
+        },
+        "country": {
+          "name": "Maa",
+          "description": "Voittoluokkien maakoodi (GR lisää Kreikan 1+1-luokan)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Synkronoi kupongit",
+      "description": "Yhdistää kupongit yksityiseen synkronointigistiisi GitHubissa nyt (vaatii tokenin asetuksissa)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automaattinen - yksi satunnainen algoritmi per kuponki",
+        "auto_column": "Automaattinen - satunnainen algoritmi per rivi",
+        "random": "Puhdas satunnainen",
+        "hot": "Kuumat numerot",
+        "cold": "Kylmät numerot",
+        "overdue": "Myöhästyneet numerot",
+        "weighted": "Esiintymistiheyden mukaan painotettu",
+        "balanced": "Tasapainotettu (kuumat + myöhästyneet)",
+        "smart": "Älykäs muoto (pariton/parillinen, summa)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Kaikki arvonnat",
+        "10y": "Viimeiset 10 vuotta",
+        "5y": "Viimeiset 5 vuotta",
+        "3y": "Viimeiset 3 vuotta",
+        "1y": "Viimeinen vuosi",
+        "last_100": "Viimeiset 100 arvontaa",
+        "last_50": "Viimeiset 50 arvontaa"
+      }
+    }
+  }
+}

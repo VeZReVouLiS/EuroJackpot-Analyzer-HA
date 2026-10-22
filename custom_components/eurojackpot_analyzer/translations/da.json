@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Tilføjer den seneste trækning, den næste trækning og jackpotten, talstatistik og en kupongenerator. Data kommer fra Allwyn og den officielle EuroJackpot-tjeneste. Ingen konto nødvendig."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer er allerede sat op."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Indstillinger for EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Opdateringsinterval (minutter)",
+          "price_per_column": "Pris pr. række (€)",
+          "notify_service": "Notifikationstjeneste (f.eks. notify.mobile_app_my_phone, tom = ingen)",
+          "jackpot_threshold": "Jackpotalarm fra (millioner €, 0 = fra)",
+          "github_token": "GitHub-token til at læse dine synkroniserede kuponer (valgfri)"
+        },
+        "description": "Notifikationer om nye trækninger, en høj jackpot og resultaterne af dine kuponer. Token (tilladelse: gist) er den samme, som du bruger i appen til kuponsynkroniseringen."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Seneste trækning"
+      },
+      "next_draw": {
+        "name": "Næste trækning"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Mest forsinkede tal"
+      },
+      "frequent_numbers": {
+        "name": "Hyppigste tal"
+      },
+      "rare_numbers": {
+        "name": "Mindst hyppige tal"
+      },
+      "generated_ticket": {
+        "name": "Lavet kupon"
+      },
+      "my_tickets": {
+        "name": "Mine kuponer"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Lav kupon",
+      "description": "Laver en kupon med 1 til 12 rækker (5 tal + 2 Eurotal hver) ud fra talstatistikken og returnerer rækkerne og den samlede pris.",
+      "fields": {
+        "columns": {
+          "name": "Rækker",
+          "description": "Antal rækker (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritme",
+          "description": "Hvordan tallene vælges. De automatiske muligheder vælger en tilfældig algoritme pr. kupon eller pr. række."
+        },
+        "period": {
+          "name": "Periode",
+          "description": "Den del af historikken, som statistikken bygger på."
+        },
+        "save": {
+          "name": "Gem som kupon",
+          "description": "Føj kuponen til Mine kuponer for den næste trækning (og til din synk-gist, hvis en token er angivet)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analysér kupon",
+      "description": "Nøjagtige gevinstsandsynligheder, forventet gevinst og et historiktjek for en kupon. Det er statistik, ikke en forudsigelse: hver række har samme chance.",
+      "fields": {
+        "numbers": {
+          "name": "Tal",
+          "description": "Rækker som '5 12 23 34 45 + 3 7', adskilt af ';'. Lad feltet være tomt for at bruge en synkroniseret kupon (uid) eller den senest lavede kupon."
+        },
+        "uid": {
+          "name": "Kuponens uid",
+          "description": "Uid for en synkroniseret kupon (se sensoren Mine kuponer)."
+        },
+        "country": {
+          "name": "Land",
+          "description": "Landekode for gevinstklasserne (GR tilføjer den græske 1+1-klasse)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Synkronisér kuponer",
+      "description": "Fletter nu kuponerne med din private synk-gist på GitHub (kræver token i indstillingerne)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatisk - én tilfældig algoritme pr. kupon",
+        "auto_column": "Automatisk - tilfældig algoritme pr. række",
+        "random": "Ren tilfældighed",
+        "hot": "Varme tal",
+        "cold": "Kolde tal",
+        "overdue": "Forsinkede tal",
+        "weighted": "Vægtet efter hyppighed",
+        "balanced": "Balanceret (varme + forsinkede)",
+        "smart": "Smart form (ulige/lige, sum)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Alle trækninger",
+        "10y": "Seneste 10 år",
+        "5y": "Seneste 5 år",
+        "3y": "Seneste 3 år",
+        "1y": "Seneste år",
+        "last_100": "Seneste 100 trækninger",
+        "last_50": "Seneste 50 trækninger"
+      }
+    }
+  }
+}

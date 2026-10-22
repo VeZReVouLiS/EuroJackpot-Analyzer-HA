@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Legger til siste trekning, neste trekning og jackpotten, tallstatistikk og en kuponggenerator. Dataene kommer fra Allwyn og den offisielle EuroJackpot-tjenesten. Ingen konto nødvendig."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer er allerede satt opp."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Alternativer for EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Oppdateringsintervall (minutter)",
+          "price_per_column": "Pris per rekke (€)",
+          "notify_service": "Varslingstjeneste (f.eks. notify.mobile_app_my_phone, tom = ingen)",
+          "jackpot_threshold": "Jackpotvarsel fra (millioner €, 0 = av)",
+          "github_token": "GitHub-token for å lese de synkroniserte kupongene dine (valgfritt)"
+        },
+        "description": "Varsler om nye trekninger, en høy jackpot og resultatene for kupongene dine. Token (tillatelse: gist) er den samme som du bruker i appen for kupongsynkroniseringen."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Siste trekning"
+      },
+      "next_draw": {
+        "name": "Neste trekning"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Mest forsinkede tall"
+      },
+      "frequent_numbers": {
+        "name": "Hyppigste tall"
+      },
+      "rare_numbers": {
+        "name": "Minst hyppige tall"
+      },
+      "generated_ticket": {
+        "name": "Laget kupong"
+      },
+      "my_tickets": {
+        "name": "Mine kuponger"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Lag kupong",
+      "description": "Lager en kupong med 1 til 12 rekker (5 tall + 2 Eurotall hver) basert på tallstatistikken og returnerer rekkene og den totale prisen.",
+      "fields": {
+        "columns": {
+          "name": "Rekker",
+          "description": "Antall rekker (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritme",
+          "description": "Hvordan tallene velges. De automatiske alternativene velger en tilfeldig algoritme per kupong eller per rekke."
+        },
+        "period": {
+          "name": "Periode",
+          "description": "Den delen av historikken som statistikken bygger på."
+        },
+        "save": {
+          "name": "Lagre som kupong",
+          "description": "Legg kupongen til i Mine kuponger for neste trekning (og i synk-gisten din hvis en token er angitt)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analyser kupong",
+      "description": "Nøyaktige gevinstsannsynligheter, forventet gevinst og en historikksjekk for en kupong. Dette er statistikk, ikke en prediksjon: hver rekke har samme sjanse.",
+      "fields": {
+        "numbers": {
+          "name": "Tall",
+          "description": "Rekker som '5 12 23 34 45 + 3 7', adskilt med ';'. La feltet stå tomt for å bruke en synkronisert kupong (uid) eller den sist lagde kupongen."
+        },
+        "uid": {
+          "name": "Kupongens uid",
+          "description": "Uid for en synkronisert kupong (se sensoren Mine kuponger)."
+        },
+        "country": {
+          "name": "Land",
+          "description": "Landskode for gevinstklassene (GR legger til den greske 1+1-klassen)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Synkroniser kuponger",
+      "description": "Slår nå sammen kupongene med din private synk-gist på GitHub (krever token i alternativene)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatisk - én tilfeldig algoritme per kupong",
+        "auto_column": "Automatisk - tilfeldig algoritme per rekke",
+        "random": "Ren tilfeldighet",
+        "hot": "Varme tall",
+        "cold": "Kalde tall",
+        "overdue": "Forsinkede tall",
+        "weighted": "Vektet etter hyppighet",
+        "balanced": "Balansert (varme + forsinkede)",
+        "smart": "Smart form (odde/partall, sum)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Alle trekninger",
+        "10y": "Siste 10 år",
+        "5y": "Siste 5 år",
+        "3y": "Siste 3 år",
+        "1y": "Siste år",
+        "last_100": "Siste 100 trekninger",
+        "last_50": "Siste 50 trekninger"
+      }
+    }
+  }
+}

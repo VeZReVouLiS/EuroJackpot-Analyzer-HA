@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Dodaje ostatnie losowanie, następne losowanie i kumulację, statystyki liczb oraz generator kuponów. Dane pochodzą z Allwyn i oficjalnej usługi EuroJackpot. Konto nie jest potrzebne."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer jest już skonfigurowany."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcje EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Interwał odświeżania (minuty)",
+          "price_per_column": "Cena za zakład (€)",
+          "notify_service": "Usługa powiadomień (np. notify.mobile_app_my_phone, puste = brak)",
+          "jackpot_threshold": "Alert o kumulacji od (mln €, 0 = wyłączone)",
+          "github_token": "Token GitHub do odczytu zsynchronizowanych kuponów (opcjonalnie)"
+        },
+        "description": "Alerty o nowych losowaniach, wysokiej kumulacji i wynikach Twoich kuponów. Token (uprawnienie: gist) jest ten sam, którego używasz w aplikacji do synchronizacji kuponów."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Ostatnie losowanie"
+      },
+      "next_draw": {
+        "name": "Następne losowanie"
+      },
+      "jackpot": {
+        "name": "Kumulacja"
+      },
+      "overdue_numbers": {
+        "name": "Najbardziej zaległe liczby"
+      },
+      "frequent_numbers": {
+        "name": "Najczęstsze liczby"
+      },
+      "rare_numbers": {
+        "name": "Najrzadsze liczby"
+      },
+      "generated_ticket": {
+        "name": "Wygenerowany kupon"
+      },
+      "my_tickets": {
+        "name": "Moje kupony"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Generuj kupon",
+      "description": "Generuje kupon z 1 do 12 zakładów (po 5 liczb + 2 liczby Euro) na podstawie statystyk liczb i zwraca zakłady oraz łączny koszt.",
+      "fields": {
+        "columns": {
+          "name": "Zakłady",
+          "description": "Liczba zakładów (1-12)."
+        },
+        "algorithm": {
+          "name": "Algorytm",
+          "description": "Sposób wyboru liczb. Opcje automatyczne wybierają losowy algorytm na kupon lub na zakład."
+        },
+        "period": {
+          "name": "Okres",
+          "description": "Część historii, na której opierają się statystyki."
+        },
+        "save": {
+          "name": "Zapisz jako kupon",
+          "description": "Dodaje kupon do Moich kuponów na następne losowanie (oraz do Twojego gist synchronizacji, gdy ustawiono token)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analizuj kupon",
+      "description": "Dokładne prawdopodobieństwa wygranej, oczekiwana wygrana i sprawdzenie w historii dla kuponu. To statystyka, a nie prognoza: każdy zakład ma taką samą szansę.",
+      "fields": {
+        "numbers": {
+          "name": "Liczby",
+          "description": "Zakłady w formacie '5 12 23 34 45 + 3 7', oddzielone znakiem ';'. Zostaw puste, aby użyć zsynchronizowanego kuponu (uid) lub ostatnio wygenerowanego kuponu."
+        },
+        "uid": {
+          "name": "Uid kuponu",
+          "description": "Uid zsynchronizowanego kuponu (zobacz sensor Moje kupony)."
+        },
+        "country": {
+          "name": "Kraj",
+          "description": "Kod kraju dla stopni wygranych (GR dodaje grecki stopień 1+1)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Synchronizuj kupony",
+      "description": "Scala teraz kupony z Twoim prywatnym gist synchronizacji na GitHub (wymaga tokenu w opcjach)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatycznie - jeden losowy algorytm na kupon",
+        "auto_column": "Automatycznie - losowy algorytm na zakład",
+        "random": "Czysto losowo",
+        "hot": "Gorące liczby",
+        "cold": "Zimne liczby",
+        "overdue": "Zaległe liczby",
+        "weighted": "Ważony częstością",
+        "balanced": "Zrównoważony (gorące + zaległe)",
+        "smart": "Inteligentny układ (parzyste/nieparzyste, suma)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Wszystkie losowania",
+        "10y": "Ostatnie 10 lat",
+        "5y": "Ostatnie 5 lat",
+        "3y": "Ostatnie 3 lata",
+        "1y": "Ostatni rok",
+        "last_100": "Ostatnie 100 losowań",
+        "last_50": "Ostatnie 50 losowań"
+      }
+    }
+  }
+}

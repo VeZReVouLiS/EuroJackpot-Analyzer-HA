@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Doda zadnje žrebanje, naslednje žrebanje in jackpot, statistiko številk ter generator listkov. Podatki prihajajo od Allwyn in uradne storitve EuroJackpot. Račun ni potreben."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer je že nastavljen."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Možnosti za EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Interval osveževanja (minute)",
+          "price_per_column": "Cena na kombinacijo (€)",
+          "notify_service": "Storitev za obvestila (npr. notify.mobile_app_my_phone, prazno = nobena)",
+          "jackpot_threshold": "Opozorilo o jackpotu od (milijonov €, 0 = izklopljeno)",
+          "github_token": "Token GitHub za branje sinhroniziranih listkov (neobvezno)"
+        },
+        "description": "Opozorila o novih žrebanjih, visokem jackpotu in rezultatih tvojih listkov. Token (dovoljenje: gist) je isti, ki ga uporabljaš v aplikaciji za sinhronizacijo listkov."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Zadnje žrebanje"
+      },
+      "next_draw": {
+        "name": "Naslednje žrebanje"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Najdlje zamujajoče številke"
+      },
+      "frequent_numbers": {
+        "name": "Najpogostejše številke"
+      },
+      "rare_numbers": {
+        "name": "Najredkejše številke"
+      },
+      "generated_ticket": {
+        "name": "Ustvarjeni listek"
+      },
+      "my_tickets": {
+        "name": "Moji listki"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Ustvari listek",
+      "description": "Ustvari listek z 1 do 12 kombinacijami (vsaka s 5 številkami + 2 Euro številkama) na podlagi statistike številk ter vrne kombinacije in skupno ceno.",
+      "fields": {
+        "columns": {
+          "name": "Kombinacije",
+          "description": "Število kombinacij (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritem",
+          "description": "Kako se izberejo številke. Samodejne možnosti izberejo naključni algoritem na listek ali na kombinacijo."
+        },
+        "period": {
+          "name": "Obdobje",
+          "description": "Del zgodovine, na katerem temelji statistika."
+        },
+        "save": {
+          "name": "Shrani kot listek",
+          "description": "Doda listek med Moje listke za naslednje žrebanje (in v tvoj gist za sinhronizacijo, če je nastavljen token)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analiziraj listek",
+      "description": "Natančne verjetnosti dobitka, pričakovani dobitek in preverjanje zgodovine za listek. To je statistika, ne napoved: vsaka kombinacija ima enako možnost.",
+      "fields": {
+        "numbers": {
+          "name": "Številke",
+          "description": "Kombinacije, kot je '5 12 23 34 45 + 3 7', ločene s ';'. Pusti prazno, da se uporabi sinhroniziran listek (uid) ali zadnji ustvarjeni listek."
+        },
+        "uid": {
+          "name": "Uid listka",
+          "description": "Uid sinhroniziranega listka (glej senzor Moji listki)."
+        },
+        "country": {
+          "name": "Država",
+          "description": "Koda države za dobitne razrede (GR doda grški razred 1+1)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Sinhroniziraj listke",
+      "description": "Takoj združi listke z zasebnim gistom za sinhronizacijo na GitHubu (potreben je token v možnostih)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Samodejno - en naključni algoritem na listek",
+        "auto_column": "Samodejno - naključni algoritem na kombinacijo",
+        "random": "Povsem naključno",
+        "hot": "Vroče številke",
+        "cold": "Hladne številke",
+        "overdue": "Zamujajoče številke",
+        "weighted": "Utežene s pogostostjo",
+        "balanced": "Uravnoteženo (vroče + zamujajoče)",
+        "smart": "Pametna oblika (liho/sodo, vsota)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Vsa žrebanja",
+        "10y": "Zadnjih 10 let",
+        "5y": "Zadnjih 5 let",
+        "3y": "Zadnja 3 leta",
+        "1y": "Zadnje leto",
+        "last_100": "Zadnjih 100 žrebanj",
+        "last_50": "Zadnjih 50 žrebanj"
+      }
+    }
+  }
+}

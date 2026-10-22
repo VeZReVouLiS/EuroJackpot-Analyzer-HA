@@ -348,3 +348,36 @@ async def test_new_options_are_saved(hass: HomeAssistant) -> None:
                           "github_token": " tok "})
     assert done["type"] == "create_entry" and e.options["notify_service"] == "notify.x" and e.options["github_token"] == "tok"
     assert e.options["jackpot_threshold"] == 40
+
+
+async def test_late_prizes_correct_an_earlier_result(hass: HomeAssistant, freezer) -> None:
+    """The prize table of a draw arrives after its numbers: the row and the results of the tickets are corrected."""
+    freezer.move_to("2026-10-14 10:00:00+00:00")
+    calls = async_mock_service(hass, "notify", "test_phone")
+    results = async_capture_events(hass, f"{DOMAIN}_ticket_result")
+    e, patches = await setup_with(hass, {"notify_service": "notify.test_phone"})
+    coord = e.runtime_data
+    row = coord.rows[-1]
+    assert row[0] == "2026-10-13"
+    coord.rows[-1] = [row[0], row[1], row[2], {"5+2": 1.0}]                      # what was known right after the draw
+    coord.state["tickets"] = [PLAYED]
+    coord.state["reported"] = ["t1|2026-10-13"]
+    coord.state["results"] = {"t1": {"date": "2026-10-13", "winning_columns": 0, "total_prize": 0, "complete": True, "tiers": []}}
+    await coord.async_refresh()
+    await coord.async_refresh()
+    stop(patches)
+    assert coord.rows[-1][3]["4+2"] == 1780.0                                    # the row has the table of the source now
+    assert len(results) == 1 and results[0].data["winning_columns"] == 1 and results[0].data["total_prize"] == 1780.0
+    assert len(calls) == 1 and "1 of 2 columns won" in calls[0].data["message"]
+
+
+async def test_options_list_the_notify_services(hass: HomeAssistant) -> None:
+    async_mock_service(hass, "notify", "mobile_app_phone")
+    async_mock_service(hass, "notify", "telegram")
+    e, patches = await setup_with(hass, {"notify_service": "notify.old_one"})
+    stop(patches)
+    flow = await hass.config_entries.options.async_init(e.entry_id)
+    field = next(k for k in flow["data_schema"].schema if str(k) == "notify_service")
+    cfg = flow["data_schema"].schema[field].config
+    assert cfg["options"] == ["notify.mobile_app_phone", "notify.old_one", "notify.telegram"]      # the current choice stays listed
+    assert cfg["custom_value"] is True                                                           # typing a name still works

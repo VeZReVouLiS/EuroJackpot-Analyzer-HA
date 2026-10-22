@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Lägger till senaste dragningen, nästa dragning och jackpotten, nummerstatistik och en kuponggenerator. Datan kommer från Allwyn och den officiella EuroJackpot-tjänsten. Inget konto behövs."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer är redan konfigurerad."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Alternativ för EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Uppdateringsintervall (minuter)",
+          "price_per_column": "Pris per rad (€)",
+          "notify_service": "Notifieringstjänst (t.ex. notify.mobile_app_my_phone, tomt = ingen)",
+          "jackpot_threshold": "Jackpotlarm från (miljoner €, 0 = av)",
+          "github_token": "GitHub-token för att läsa dina synkade kuponger (valfritt)"
+        },
+        "description": "Notiser om nya dragningar, en hög jackpot och resultaten för dina kuponger. Token (behörighet: gist) är samma som du använder i appen för kupongsynken."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Senaste dragningen"
+      },
+      "next_draw": {
+        "name": "Nästa dragning"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Mest försenade nummer"
+      },
+      "frequent_numbers": {
+        "name": "Vanligaste nummer"
+      },
+      "rare_numbers": {
+        "name": "Minst vanliga nummer"
+      },
+      "generated_ticket": {
+        "name": "Skapad kupong"
+      },
+      "my_tickets": {
+        "name": "Mina kuponger"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Skapa kupong",
+      "description": "Skapar en kupong med 1 till 12 rader (5 nummer + 2 Eurotal vardera) utifrån nummerstatistiken och returnerar raderna och den totala kostnaden.",
+      "fields": {
+        "columns": {
+          "name": "Rader",
+          "description": "Antal rader (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritm",
+          "description": "Hur numren väljs. De automatiska alternativen väljer en slumpad algoritm per kupong eller per rad."
+        },
+        "period": {
+          "name": "Period",
+          "description": "Den del av historiken som statistiken bygger på."
+        },
+        "save": {
+          "name": "Spara som kupong",
+          "description": "Lägg till kupongen i Mina kuponger för nästa dragning (och i din synk-gist om en token är angiven)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analysera kupong",
+      "description": "Exakta vinstsannolikheter, förväntad vinst och en historikkontroll för en kupong. Det är statistik, inte en förutsägelse: varje rad har samma chans.",
+      "fields": {
+        "numbers": {
+          "name": "Nummer",
+          "description": "Rader som '5 12 23 34 45 + 3 7', åtskilda med ';'. Lämna tomt för att använda en synkad kupong (uid) eller den senast skapade kupongen."
+        },
+        "uid": {
+          "name": "Kupongens uid",
+          "description": "Uid för en synkad kupong (se sensorn Mina kuponger)."
+        },
+        "country": {
+          "name": "Land",
+          "description": "Landskod för vinstklasserna (GR lägger till den grekiska 1+1-klassen)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Synka kuponger",
+      "description": "Slår nu ihop kupongerna med din privata synk-gist på GitHub (kräver token i alternativen)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatiskt - en slumpad algoritm per kupong",
+        "auto_column": "Automatiskt - slumpad algoritm per rad",
+        "random": "Rent slumpmässigt",
+        "hot": "Heta nummer",
+        "cold": "Kalla nummer",
+        "overdue": "Försenade nummer",
+        "weighted": "Frekvensviktat",
+        "balanced": "Balanserat (heta + försenade)",
+        "smart": "Smart form (udda/jämna, summa)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Alla dragningar",
+        "10y": "Senaste 10 åren",
+        "5y": "Senaste 5 åren",
+        "3y": "Senaste 3 åren",
+        "1y": "Senaste året",
+        "last_100": "Senaste 100 dragningarna",
+        "last_50": "Senaste 50 dragningarna"
+      }
+    }
+  }
+}

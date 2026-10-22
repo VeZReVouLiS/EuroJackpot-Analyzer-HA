@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Añade el último sorteo, el próximo sorteo y el bote, estadísticas de números y un generador de boletos. Los datos proceden de Allwyn y del servicio oficial de EuroJackpot. No hace falta cuenta."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer ya está configurado."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opciones de EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Intervalo de actualización (minutos)",
+          "price_per_column": "Precio por apuesta (€)",
+          "notify_service": "Servicio de notificación (p. ej. notify.mobile_app_my_phone, vacío = ninguno)",
+          "jackpot_threshold": "Alerta de bote desde (millones de €, 0 = desactivada)",
+          "github_token": "Token de GitHub para leer tus boletos sincronizados (opcional)"
+        },
+        "description": "Alertas de nuevos sorteos, de un bote alto y de los resultados de tus boletos. El token (permiso: gist) es el mismo que usas en la app para la sincronización de boletos."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Último sorteo"
+      },
+      "next_draw": {
+        "name": "Próximo sorteo"
+      },
+      "jackpot": {
+        "name": "Bote"
+      },
+      "overdue_numbers": {
+        "name": "Números más atrasados"
+      },
+      "frequent_numbers": {
+        "name": "Números más frecuentes"
+      },
+      "rare_numbers": {
+        "name": "Números menos frecuentes"
+      },
+      "generated_ticket": {
+        "name": "Boleto generado"
+      },
+      "my_tickets": {
+        "name": "Mis boletos"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Generar boleto",
+      "description": "Genera un boleto de 1 a 12 apuestas (5 números + 2 Euronúmeros cada una) a partir de las estadísticas de números, y devuelve las apuestas y el coste total.",
+      "fields": {
+        "columns": {
+          "name": "Apuestas",
+          "description": "Número de apuestas (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritmo",
+          "description": "Cómo se eligen los números. Las opciones automáticas eligen un algoritmo aleatorio por boleto o por apuesta."
+        },
+        "period": {
+          "name": "Periodo",
+          "description": "La parte del historial en la que se basan las estadísticas."
+        },
+        "save": {
+          "name": "Guardar como boleto",
+          "description": "Añade el boleto a Mis boletos para el próximo sorteo (y a tu gist de sincronización cuando hay un token configurado)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analizar boleto",
+      "description": "Probabilidades exactas de premio, premio esperado y comprobación en el historial de un boleto. Es estadística, no una predicción: todas las apuestas tienen la misma probabilidad.",
+      "fields": {
+        "numbers": {
+          "name": "Números",
+          "description": "Apuestas como '5 12 23 34 45 + 3 7', separadas por ';'. Déjalo vacío para usar un boleto sincronizado (uid) o el último boleto generado."
+        },
+        "uid": {
+          "name": "Uid del boleto",
+          "description": "El uid de un boleto sincronizado (consulta el sensor Mis boletos)."
+        },
+        "country": {
+          "name": "País",
+          "description": "Código de país para las categorías de premio (GR añade la categoría griega 1+1)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Sincronizar boletos",
+      "description": "Fusiona ahora los boletos con tu gist de sincronización privado en GitHub (requiere el token en las opciones)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automático - un algoritmo aleatorio por boleto",
+        "auto_column": "Automático - algoritmo aleatorio por apuesta",
+        "random": "Totalmente aleatorio",
+        "hot": "Números calientes",
+        "cold": "Números fríos",
+        "overdue": "Números atrasados",
+        "weighted": "Ponderado por frecuencia",
+        "balanced": "Equilibrado (calientes + atrasados)",
+        "smart": "Forma inteligente (pares/impares, suma)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Todos los sorteos",
+        "10y": "Últimos 10 años",
+        "5y": "Últimos 5 años",
+        "3y": "Últimos 3 años",
+        "1y": "Último año",
+        "last_100": "Últimos 100 sorteos",
+        "last_50": "Últimos 50 sorteos"
+      }
+    }
+  }
+}

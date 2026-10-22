@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Hozzáadja a legutóbbi és a következő húzást, a jackpotot, a számstatisztikát és egy szelvénygenerátort. Az adatok az Allwyntől és a hivatalos EuroJackpot szolgáltatástól származnak. Nincs szükség fiókra."
+      }
+    },
+    "abort": {
+      "already_configured": "Az EuroJackpot Analyzer már be van állítva."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "EuroJackpot Analyzer beállításai",
+        "data": {
+          "scan_interval": "Frissítési időköz (perc)",
+          "price_per_column": "Ár soronként (€)",
+          "notify_service": "Értesítési szolgáltatás (pl. notify.mobile_app_my_phone, üres = nincs)",
+          "jackpot_threshold": "Jackpot-értesítés innentől (millió €, 0 = ki)",
+          "github_token": "GitHub-token a szinkronizált szelvények olvasásához (nem kötelező)"
+        },
+        "description": "Értesítések az új húzásokról, a magas jackpotról és a szelvényeid eredményeiről. A token (jogosultság: gist) ugyanaz, amelyet az alkalmazásban a szelvényszinkronhoz használsz."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Legutóbbi húzás"
+      },
+      "next_draw": {
+        "name": "Következő húzás"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Legrégebben nem húzott számok"
+      },
+      "frequent_numbers": {
+        "name": "Leggyakoribb számok"
+      },
+      "rare_numbers": {
+        "name": "Legritkább számok"
+      },
+      "generated_ticket": {
+        "name": "Generált szelvény"
+      },
+      "my_tickets": {
+        "name": "Szelvényeim"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Szelvény generálása",
+      "description": "A számstatisztika alapján generál egy 1-12 soros szelvényt (soronként 5 szám + 2 Euroszám), és visszaadja a sorokat és a teljes árat.",
+      "fields": {
+        "columns": {
+          "name": "Sorok",
+          "description": "A sorok száma (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritmus",
+          "description": "Hogyan választja ki a számokat. Az automatikus lehetőségek szelvényenként vagy soronként véletlen algoritmust választanak."
+        },
+        "period": {
+          "name": "Időszak",
+          "description": "Az előzmények azon része, amelyre a statisztika épül."
+        },
+        "save": {
+          "name": "Mentés szelvényként",
+          "description": "Hozzáadja a szelvényt a Szelvényeim közé a következő húzásra (és a szinkron-gistedbe, ha be van állítva token)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Szelvény elemzése",
+      "description": "Pontos nyerési valószínűségek, várható nyeremény és előzmény-ellenőrzés egy szelvényhez. Ez statisztika, nem előrejelzés: minden sornak ugyanakkora az esélye.",
+      "fields": {
+        "numbers": {
+          "name": "Számok",
+          "description": "Sorok '5 12 23 34 45 + 3 7' alakban, ';' jellel elválasztva. Hagyd üresen, ha szinkronizált szelvényt (uid) vagy az utoljára generált szelvényt szeretnéd használni."
+        },
+        "uid": {
+          "name": "Szelvény uid",
+          "description": "Egy szinkronizált szelvény uid-ja (lásd a Szelvényeim szenzort)."
+        },
+        "country": {
+          "name": "Ország",
+          "description": "Az országkód a nyereményosztályokhoz (a GR hozzáadja a görög 1+1 osztályt)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Szelvények szinkronizálása",
+      "description": "Most egyesíti a szelvényeket a GitHubon lévő privát szinkron-gisteddel (a beállításokban megadott token szükséges)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatikus - szelvényenként egy véletlen algoritmus",
+        "auto_column": "Automatikus - soronként véletlen algoritmus",
+        "random": "Tiszta véletlen",
+        "hot": "Forró számok",
+        "cold": "Hideg számok",
+        "overdue": "Késő számok",
+        "weighted": "Gyakorisággal súlyozott",
+        "balanced": "Kiegyensúlyozott (forró + késő)",
+        "smart": "Okos alak (páratlan/páros, összeg)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Minden húzás",
+        "10y": "Utolsó 10 év",
+        "5y": "Utolsó 5 év",
+        "3y": "Utolsó 3 év",
+        "1y": "Utolsó év",
+        "last_100": "Utolsó 100 húzás",
+        "last_50": "Utolsó 50 húzás"
+      }
+    }
+  }
+}

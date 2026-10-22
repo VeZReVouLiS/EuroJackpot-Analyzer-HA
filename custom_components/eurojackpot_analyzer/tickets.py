@@ -2,7 +2,10 @@
 notification messages say."""
 from __future__ import annotations
 
+import json
+
 from .core import evaluation, ticket_sync
+from .message_packs import EXTRA
 
 MESSAGES = {
     "el": {
@@ -31,9 +34,12 @@ MESSAGES = {
     },
 }
 
+MESSAGES.update(EXTRA)
+
 
 def text(lang: str, key: str, **kw) -> str:
-    table = MESSAGES.get((lang or "en")[:2], MESSAGES["en"])
+    code = (lang or "en")[:2].lower()
+    table = MESSAGES.get("nb" if code == "no" else code, MESSAGES["en"])
     return table[key].format(**kw)
 
 
@@ -48,10 +54,12 @@ def draw_for(rows: list[list], date: str) -> dict | None:
     return None
 
 
-def pending_results(tickets: list[dict], rows: list[list], done: set[str]) -> list[dict]:
+def pending_results(tickets: list[dict], rows: list[list], done: set[str], sigs: dict[str, str] | None = None) -> list[dict]:
     """Results of the played tickets whose draw is in the history and that were not reported yet.
 
-    `done` holds `uid|date` keys of what was reported. Every item: {key, uid, date, result}.
+    `done` holds `uid|date` keys of what was reported and `sigs` the prize table each result was computed with: a ticket is
+    checked again when the table of its draw changed (the prizes are published after the numbers).
+    Every item: {key, uid, date, sig, result}.
     """
     out = []
     for t in tickets:
@@ -59,15 +67,16 @@ def pending_results(tickets: list[dict], rows: list[list], done: set[str]) -> li
             continue
         uid = ticket_sync.uid_of(t)
         key = f"{uid}|{t['target_date']}"
-        if key in done:
-            continue
         draw = draw_for(rows, t["target_date"])
         if not draw:
+            continue
+        sig = json.dumps(draw.get("details"), sort_keys=True)
+        if key in done and (sigs is None or sigs.get(key) == sig):
             continue
         cols = [{"main": c["main"], "euro": c["euro"]} for c in t.get("columns") or []]
         if not cols:
             continue
-        out.append({"key": key, "uid": uid, "date": t["target_date"], "result": evaluation.evaluate_ticket(cols, draw)})
+        out.append({"key": key, "uid": uid, "date": t["target_date"], "sig": sig, "result": evaluation.evaluate_ticket(cols, draw)})
     return out
 
 

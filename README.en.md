@@ -8,7 +8,7 @@ EuroJackpot in Home Assistant, with its own **sidebar panel** that fills the who
 - **Next draw** with date/time and a countdown `DD : HH : MM : SS`.
 - **Overdue map** of the 50 numbers with colours, and rankings: most overdue, most frequent, least frequent.
 - **Ticket generator** of 1-12 columns with 7 algorithms or automatic choice, with the total cost (price per column is editable, default €2.50).
-- **Greek / English / German** and a **country selector**, both in flag menus. A change applies instantly.
+- **20 languages** (Greek, English, German and the languages of all EuroJackpot countries, translated with AI) and a **country selector**, both in flag menus. A change applies instantly.
 
 No account and no API key needed. The data comes from Allwyn and the official EuroJackpot service.
 The history since 2012 is already bundled, so it works immediately and even without internet.

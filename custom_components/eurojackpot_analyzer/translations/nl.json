@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Voegt de laatste trekking, de volgende trekking en jackpot, getalstatistieken en een ticketgenerator toe. De gegevens komen van Allwyn en de officiële EuroJackpot-dienst. Geen account nodig."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer is al ingesteld."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opties van EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Vernieuwingsinterval (minuten)",
+          "price_per_column": "Prijs per rij (€)",
+          "notify_service": "Meldingsservice (bijv. notify.mobile_app_my_phone, leeg = geen)",
+          "jackpot_threshold": "Jackpotmelding vanaf (miljoen €, 0 = uit)",
+          "github_token": "GitHub-token om je gesynchroniseerde tickets te lezen (optioneel)"
+        },
+        "description": "Meldingen voor nieuwe trekkingen, een hoge jackpot en de resultaten van je tickets. Het token (machtiging: gist) is hetzelfde als dat je in de app gebruikt voor de ticketsynchronisatie."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Laatste trekking"
+      },
+      "next_draw": {
+        "name": "Volgende trekking"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Meest achterstallige getallen"
+      },
+      "frequent_numbers": {
+        "name": "Meest voorkomende getallen"
+      },
+      "rare_numbers": {
+        "name": "Minst voorkomende getallen"
+      },
+      "generated_ticket": {
+        "name": "Gegenereerd ticket"
+      },
+      "my_tickets": {
+        "name": "Mijn tickets"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Ticket genereren",
+      "description": "Genereert een ticket van 1 tot 12 rijen (elk 5 getallen + 2 Eurogetallen) op basis van de getalstatistieken en geeft de rijen en de totale kosten terug.",
+      "fields": {
+        "columns": {
+          "name": "Rijen",
+          "description": "Aantal rijen (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritme",
+          "description": "Hoe de getallen worden gekozen. De automatische opties kiezen een willekeurig algoritme per ticket of per rij."
+        },
+        "period": {
+          "name": "Periode",
+          "description": "Het deel van de geschiedenis waarop de statistieken zijn gebaseerd."
+        },
+        "save": {
+          "name": "Opslaan als ticket",
+          "description": "Voeg het ticket toe aan Mijn tickets voor de volgende trekking (en aan je synchronisatie-gist als er een token is ingesteld)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Ticket analyseren",
+      "description": "Exacte winkansen, verwachte prijs en een controle met de geschiedenis voor een ticket. Het is statistiek, geen voorspelling: elke rij heeft dezelfde kans.",
+      "fields": {
+        "numbers": {
+          "name": "Getallen",
+          "description": "Rijen zoals '5 12 23 34 45 + 3 7', gescheiden door ';'. Laat leeg om een gesynchroniseerd ticket (uid) of het laatst gegenereerde ticket te gebruiken."
+        },
+        "uid": {
+          "name": "Ticket-uid",
+          "description": "De uid van een gesynchroniseerd ticket (zie de sensor Mijn tickets)."
+        },
+        "country": {
+          "name": "Land",
+          "description": "Landcode voor de prijsklassen (GR voegt de Griekse 1+1-klasse toe)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Tickets synchroniseren",
+      "description": "Voegt de tickets nu samen met je privé-synchronisatie-gist op GitHub (vereist het token in de opties)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatisch - één willekeurig algoritme per ticket",
+        "auto_column": "Automatisch - willekeurig algoritme per rij",
+        "random": "Puur willekeurig",
+        "hot": "Hete getallen",
+        "cold": "Koude getallen",
+        "overdue": "Achterstallige getallen",
+        "weighted": "Gewogen op frequentie",
+        "balanced": "Gebalanceerd (heet + achterstallig)",
+        "smart": "Slimme vorm (oneven/even, som)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Alle trekkingen",
+        "10y": "Laatste 10 jaar",
+        "5y": "Laatste 5 jaar",
+        "3y": "Laatste 3 jaar",
+        "1y": "Laatste jaar",
+        "last_100": "Laatste 100 trekkingen",
+        "last_50": "Laatste 50 trekkingen"
+      }
+    }
+  }
+}

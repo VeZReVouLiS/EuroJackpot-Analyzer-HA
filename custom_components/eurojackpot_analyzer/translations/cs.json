@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Přidá poslední tah, příští tah a jackpot, statistiky čísel a generátor tiketů. Data pocházejí z Allwyn a oficiální služby EuroJackpot. Není potřeba žádný účet."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer je už nastaven."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Možnosti EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Interval obnovení (minuty)",
+          "price_per_column": "Cena za sloupec (€)",
+          "notify_service": "Služba oznámení (např. notify.mobile_app_my_phone, prázdné = žádná)",
+          "jackpot_threshold": "Upozornit na jackpot od (milionů €, 0 = vypnuto)",
+          "github_token": "Token GitHub pro čtení synchronizovaných tiketů (volitelné)"
+        },
+        "description": "Upozornění na nové tahy, vysoký jackpot a výsledky tvých tiketů. Token (oprávnění: gist) je stejný, jaký používáš v aplikaci pro synchronizaci tiketů."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Poslední tah"
+      },
+      "next_draw": {
+        "name": "Příští tah"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Nejdéle nevytažená čísla"
+      },
+      "frequent_numbers": {
+        "name": "Nejčastější čísla"
+      },
+      "rare_numbers": {
+        "name": "Nejméně častá čísla"
+      },
+      "generated_ticket": {
+        "name": "Vygenerovaný tiket"
+      },
+      "my_tickets": {
+        "name": "Moje tikety"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Vygenerovat tiket",
+      "description": "Vygeneruje tiket o 1 až 12 sloupcích (každý 5 čísel + 2 euročísla) podle statistik čísel a vrátí sloupce a celkovou cenu.",
+      "fields": {
+        "columns": {
+          "name": "Sloupce",
+          "description": "Počet sloupců (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritmus",
+          "description": "Jak se čísla vybírají. Automatické možnosti zvolí náhodný algoritmus na tiket nebo na sloupec."
+        },
+        "period": {
+          "name": "Období",
+          "description": "Část historie, na které statistiky stojí."
+        },
+        "save": {
+          "name": "Uložit jako tiket",
+          "description": "Přidá tiket do Moje tikety pro příští tah (a do tvého synchronizačního gistu, je-li nastaven token)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analyzovat tiket",
+      "description": "Přesné pravděpodobnosti výhry, očekávaná výhra a kontrola historie pro tiket. Je to statistika, ne předpověď: každý sloupec má stejnou šanci.",
+      "fields": {
+        "numbers": {
+          "name": "Čísla",
+          "description": "Sloupce ve tvaru '5 12 23 34 45 + 3 7', oddělené znakem ';'. Ponech prázdné, chceš-li použít synchronizovaný tiket (uid) nebo naposledy vygenerovaný tiket."
+        },
+        "uid": {
+          "name": "Uid tiketu",
+          "description": "Uid synchronizovaného tiketu (viz senzor Moje tikety)."
+        },
+        "country": {
+          "name": "Země",
+          "description": "Kód země pro pořadí výher (GR přidá řecké pořadí 1+1)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Synchronizovat tikety",
+      "description": "Sloučí tikety s tvým soukromým synchronizačním gistem na GitHubu právě teď (vyžaduje token v nastavení)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automaticky - jeden náhodný algoritmus na tiket",
+        "auto_column": "Automaticky - náhodný algoritmus na sloupec",
+        "random": "Čistě náhodně",
+        "hot": "Horká čísla",
+        "cold": "Studená čísla",
+        "overdue": "Zpožděná čísla",
+        "weighted": "Vážené četností",
+        "balanced": "Vyvážený (horká + zpožděná)",
+        "smart": "Chytrý tvar (lichá/sudá, součet)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Všechny tahy",
+        "10y": "Posledních 10 let",
+        "5y": "Posledních 5 let",
+        "3y": "Poslední 3 roky",
+        "1y": "Poslední rok",
+        "last_100": "Posledních 100 tahů",
+        "last_50": "Posledních 50 tahů"
+      }
+    }
+  }
+}

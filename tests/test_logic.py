@@ -152,3 +152,28 @@ def test_jackpot_due():
     assert jackpot_due(30e6, 25, "2026-10-16T18:00", None)
     assert not jackpot_due(30e6, 25, "2026-10-16T18:00", "2026-10-16T18:00")      # once per draw
     assert not jackpot_due(20e6, 25, "k", None) and not jackpot_due(30e6, 0, "k", None) and not jackpot_due(None, 25, "k", None)
+
+
+def _shape(d):
+    return {k: _shape(v) for k, v in d.items()} if isinstance(d, dict) else None
+
+
+def test_every_language_is_complete():
+    import json
+    from pathlib import Path
+    from custom_components.eurojackpot_analyzer import tickets as tk
+    base = Path(__file__).parent.parent / "custom_components" / "eurojackpot_analyzer"
+    en = _shape(json.loads((base / "translations" / "en.json").read_text(encoding="utf-8")))
+    files = sorted((base / "translations").glob("*.json"))
+    assert len(files) >= 20
+    for f in files:
+        assert _shape(json.loads(f.read_text(encoding="utf-8"))) == en, f.name
+    for lang, msgs in tk.MESSAGES.items():
+        assert set(msgs) == set(tk.MESSAGES["en"]), lang
+    packs = sorted((base / "www" / "assets" / "lang").glob("*.json"))
+    en_card = None
+    for f in packs:
+        card = json.loads(f.read_text(encoding="utf-8"))
+        en_card = en_card or _shape(card)
+        assert _shape(card) == en_card, f.name
+    assert {f.stem for f in packs} | {"el", "en", "de"} == {f.stem for f in files}

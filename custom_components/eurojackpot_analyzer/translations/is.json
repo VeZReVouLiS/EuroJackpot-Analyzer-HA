@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Bætir við síðasta og næsta útdrætti, jackpot, tölfræði talna og miðaframleiðanda. Gögnin koma frá Allwyn og opinberu EuroJackpot-þjónustunni. Enginn reikningur nauðsynlegur."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer er þegar uppsett."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Valkostir EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Endurnýjunartíðni (mínútur)",
+          "price_per_column": "Verð á röð (€)",
+          "notify_service": "Tilkynningaþjónusta (t.d. notify.mobile_app_my_phone, tómt = engin)",
+          "jackpot_threshold": "Jackpot-viðvörun frá (milljónir €, 0 = slökkt)",
+          "github_token": "GitHub token til að lesa samstillta miða þína (valfrjálst)"
+        },
+        "description": "Viðvaranir um nýja útdrætti, háan jackpot og niðurstöður miðanna þinna. Tokenið (heimild: gist) er það sama og þú notar í forritinu fyrir miðasamstillinguna."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Síðasti útdráttur"
+      },
+      "next_draw": {
+        "name": "Næsti útdráttur"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Lengst ókomnar tölur"
+      },
+      "frequent_numbers": {
+        "name": "Algengustu tölur"
+      },
+      "rare_numbers": {
+        "name": "Sjaldgæfustu tölur"
+      },
+      "generated_ticket": {
+        "name": "Búinn til miði"
+      },
+      "my_tickets": {
+        "name": "Miðarnir mínir"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Búa til miða",
+      "description": "Býr til miða með 1 til 12 röðum (5 tölur + 2 evrutölur hver) með tölfræði talna og skilar röðunum og heildarverði.",
+      "fields": {
+        "columns": {
+          "name": "Raðir",
+          "description": "Fjöldi raða (1-12)."
+        },
+        "algorithm": {
+          "name": "Reiknirit",
+          "description": "Hvernig tölurnar eru valdar. Sjálfvirku valkostirnir velja tilviljanakennt reiknirit á miða eða á röð."
+        },
+        "period": {
+          "name": "Tímabil",
+          "description": "Sá hluti sögunnar sem tölfræðin byggist á."
+        },
+        "save": {
+          "name": "Vista sem miða",
+          "description": "Bæta miðanum við Miðarnir mínir fyrir næsta útdrátt (og í samstillingargistið þitt þegar token er stillt)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Greina miða",
+      "description": "Nákvæmar vinningslíkur, væntur vinningur og söguathugun fyrir miða. Þetta er tölfræði, ekki spá: hver röð hefur sömu líkur.",
+      "fields": {
+        "numbers": {
+          "name": "Tölur",
+          "description": "Raðir eins og '5 12 23 34 45 + 3 7', aðskildar með ';'. Skildu eftir tómt til að nota samstilltan miða (uid) eða síðasta búna til miða."
+        },
+        "uid": {
+          "name": "uid miða",
+          "description": "uid samstillts miða (sjá skynjarann Miðarnir mínir)."
+        },
+        "country": {
+          "name": "Land",
+          "description": "Landskóði fyrir vinningsflokka (GR bætir við gríska 1+1 flokknum)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Samstilla miða",
+      "description": "Sameinar miðana við einka-samstillingargistið þitt á GitHub núna (krefst tokens í valkostum)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Sjálfvirkt - eitt tilviljanakennt reiknirit á miða",
+        "auto_column": "Sjálfvirkt - tilviljanakennt reiknirit á röð",
+        "random": "Hrein tilviljun",
+        "hot": "Heitar tölur",
+        "cold": "Kaldar tölur",
+        "overdue": "Lengi ókomnar tölur",
+        "weighted": "Vegið eftir tíðni",
+        "balanced": "Jafnvægi (heitar + ókomnar)",
+        "smart": "Snjallt form (oddatölur/sléttar, summa)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Allir útdrættir",
+        "10y": "Síðustu 10 ár",
+        "5y": "Síðustu 5 ár",
+        "3y": "Síðustu 3 ár",
+        "1y": "Síðasta ár",
+        "last_100": "Síðustu 100 útdrættir",
+        "last_50": "Síðustu 50 útdrættir"
+      }
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Aggiunge l'ultima estrazione, la prossima estrazione e il jackpot, le statistiche dei numeri e un generatore di schedine. I dati provengono da Allwyn e dal servizio ufficiale EuroJackpot. Non serve alcun account."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer è già configurato."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opzioni di EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Intervallo di aggiornamento (minuti)",
+          "price_per_column": "Prezzo per colonna (€)",
+          "notify_service": "Servizio di notifica (es. notify.mobile_app_my_phone, vuoto = nessuno)",
+          "jackpot_threshold": "Avviso jackpot da (milioni €, 0 = disattivato)",
+          "github_token": "Token GitHub per leggere le schedine sincronizzate (facoltativo)"
+        },
+        "description": "Avvisi per le nuove estrazioni, per un jackpot alto e per i risultati delle tue schedine. Il token (permesso: gist) è lo stesso che usi nell'app per la sincronizzazione delle schedine."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Ultima estrazione"
+      },
+      "next_draw": {
+        "name": "Prossima estrazione"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Numeri più ritardatari"
+      },
+      "frequent_numbers": {
+        "name": "Numeri più frequenti"
+      },
+      "rare_numbers": {
+        "name": "Numeri meno frequenti"
+      },
+      "generated_ticket": {
+        "name": "Schedina generata"
+      },
+      "my_tickets": {
+        "name": "Le mie schedine"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Genera schedina",
+      "description": "Genera una schedina da 1 a 12 colonne (ciascuna con 5 numeri + 2 Euro numeri) in base alle statistiche dei numeri e restituisce le colonne e il costo totale.",
+      "fields": {
+        "columns": {
+          "name": "Colonne",
+          "description": "Numero di colonne (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritmo",
+          "description": "Come vengono scelti i numeri. Le opzioni automatiche scelgono un algoritmo casuale per schedina o per colonna."
+        },
+        "period": {
+          "name": "Periodo",
+          "description": "La parte dello storico su cui si basano le statistiche."
+        },
+        "save": {
+          "name": "Salva come schedina",
+          "description": "Aggiunge la schedina a Le mie schedine per la prossima estrazione (e al tuo gist di sincronizzazione se è impostato un token)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analizza schedina",
+      "description": "Probabilità di vincita esatte, premio atteso e controllo storico per una schedina. Sono statistiche, non una previsione: ogni colonna ha la stessa probabilità.",
+      "fields": {
+        "numbers": {
+          "name": "Numeri",
+          "description": "Colonne come '5 12 23 34 45 + 3 7', separate da ';'. Lascia vuoto per usare una schedina sincronizzata (uid) o l'ultima schedina generata."
+        },
+        "uid": {
+          "name": "Uid della schedina",
+          "description": "L'uid di una schedina sincronizzata (vedi il sensore Le mie schedine)."
+        },
+        "country": {
+          "name": "Paese",
+          "description": "Codice del paese per le categorie di premio (GR aggiunge la categoria greca 1+1)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Sincronizza schedine",
+      "description": "Unisce subito le schedine con il tuo gist privato di sincronizzazione su GitHub (serve il token nelle opzioni)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatico - un algoritmo casuale per schedina",
+        "auto_column": "Automatico - algoritmo casuale per colonna",
+        "random": "Puro caso",
+        "hot": "Numeri caldi",
+        "cold": "Numeri freddi",
+        "overdue": "Numeri ritardatari",
+        "weighted": "Ponderato sulla frequenza",
+        "balanced": "Bilanciato (caldi + ritardatari)",
+        "smart": "Forma intelligente (pari/dispari, somma)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Tutte le estrazioni",
+        "10y": "Ultimi 10 anni",
+        "5y": "Ultimi 5 anni",
+        "3y": "Ultimi 3 anni",
+        "1y": "Ultimo anno",
+        "last_100": "Ultime 100 estrazioni",
+        "last_50": "Ultime 50 estrazioni"
+      }
+    }
+  }
+}

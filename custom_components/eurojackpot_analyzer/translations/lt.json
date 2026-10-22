@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Prideda paskutinį traukimą, kitą traukimą ir džekpotą, skaičių statistiką ir bilietų generatorių. Duomenys gaunami iš Allwyn ir oficialios EuroJackpot paslaugos. Paskyra nereikalinga."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer jau nustatytas."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "EuroJackpot Analyzer parinktys",
+        "data": {
+          "scan_interval": "Atnaujinimo intervalas (minutėmis)",
+          "price_per_column": "Kaina už kombinaciją (€)",
+          "notify_service": "Pranešimų paslauga (pvz., notify.mobile_app_my_phone, tuščia = nėra)",
+          "jackpot_threshold": "Džekpoto įspėjimas nuo (mln. €, 0 = išjungta)",
+          "github_token": "GitHub token sinchronizuotiems bilietams skaityti (neprivaloma)"
+        },
+        "description": "Įspėjimai apie naujus traukimus, didelį džekpotą ir tavo bilietų rezultatus. Token (leidimas: gist) yra tas pats, kurį naudoji programoje bilietų sinchronizavimui."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Paskutinis traukimas"
+      },
+      "next_draw": {
+        "name": "Kitas traukimas"
+      },
+      "jackpot": {
+        "name": "Džekpotas"
+      },
+      "overdue_numbers": {
+        "name": "Seniausiai nekritę skaičiai"
+      },
+      "frequent_numbers": {
+        "name": "Dažniausi skaičiai"
+      },
+      "rare_numbers": {
+        "name": "Rečiausi skaičiai"
+      },
+      "generated_ticket": {
+        "name": "Sugeneruotas bilietas"
+      },
+      "my_tickets": {
+        "name": "Mano bilietai"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Generuoti bilietą",
+      "description": "Sugeneruoja 1-12 kombinacijų bilietą (kiekvienoje 5 skaičiai + 2 Euro skaičiai) pagal skaičių statistiką ir grąžina kombinacijas bei bendrą kainą.",
+      "fields": {
+        "columns": {
+          "name": "Kombinacijos",
+          "description": "Kombinacijų skaičius (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritmas",
+          "description": "Kaip parenkami skaičiai. Automatinės parinktys parenka atsitiktinį algoritmą kiekvienam bilietui arba kombinacijai."
+        },
+        "period": {
+          "name": "Laikotarpis",
+          "description": "Istorijos dalis, kuria remiasi statistika."
+        },
+        "save": {
+          "name": "Išsaugoti kaip bilietą",
+          "description": "Prideda bilietą prie Mano bilietų kitam traukimui (ir prie tavo sinchronizavimo gist, kai nustatytas token)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analizuoti bilietą",
+      "description": "Tikslios laimėjimo tikimybės, tikėtinas laimėjimas ir istorijos patikra bilietui. Tai statistika, o ne prognozė: kiekviena kombinacija turi tokią pačią tikimybę.",
+      "fields": {
+        "numbers": {
+          "name": "Skaičiai",
+          "description": "Kombinacijos formatu '5 12 23 34 45 + 3 7', atskirtos ';'. Palik tuščią, jei nori naudoti sinchronizuotą bilietą (uid) arba paskutinį sugeneruotą bilietą."
+        },
+        "uid": {
+          "name": "Bilieto uid",
+          "description": "Sinchronizuoto bilieto uid (žr. jutiklį Mano bilietai)."
+        },
+        "country": {
+          "name": "Šalis",
+          "description": "Šalies kodas laimėjimų kategorijoms (GR prideda Graikijos 1+1 kategoriją)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Sinchronizuoti bilietus",
+      "description": "Dabar sujungia bilietus su tavo privačiu sinchronizavimo gist GitHub (reikia token parinktyse)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automatinis - vienas atsitiktinis algoritmas bilietui",
+        "auto_column": "Automatinis - atsitiktinis algoritmas kombinacijai",
+        "random": "Visiškai atsitiktinis",
+        "hot": "Karšti skaičiai",
+        "cold": "Šalti skaičiai",
+        "overdue": "Seniai nekritę skaičiai",
+        "weighted": "Svertas pagal dažnį",
+        "balanced": "Subalansuotas (karšti + seniai nekritę)",
+        "smart": "Protinga forma (lyginiai/nelyginiai, suma)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Visi traukimai",
+        "10y": "Paskutiniai 10 metų",
+        "5y": "Paskutiniai 5 metai",
+        "3y": "Paskutiniai 3 metai",
+        "1y": "Paskutiniai metai",
+        "last_100": "Paskutiniai 100 traukimų",
+        "last_50": "Paskutiniai 50 traukimų"
+      }
+    }
+  }
+}

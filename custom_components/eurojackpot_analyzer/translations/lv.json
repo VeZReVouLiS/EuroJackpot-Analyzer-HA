@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Pievieno pēdējo izlozi, nākamo izlozi un džekpotu, skaitļu statistiku un biļešu ģeneratoru. Dati nāk no Allwyn un oficiālā EuroJackpot servisa. Konts nav nepieciešams."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer jau ir iestatīts."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "EuroJackpot Analyzer opcijas",
+        "data": {
+          "scan_interval": "Atsvaidzināšanas intervāls (minūtes)",
+          "price_per_column": "Cena par kombināciju (€)",
+          "notify_service": "Paziņojumu serviss (piem., notify.mobile_app_my_phone, tukšs = nav)",
+          "jackpot_threshold": "Džekpota brīdinājums no (miljoni €, 0 = izslēgts)",
+          "github_token": "GitHub token, lai lasītu sinhronizētās biļetes (nav obligāts)"
+        },
+        "description": "Brīdinājumi par jaunām izlozēm, lielu džekpotu un biļešu rezultātiem. Token (atļauja: gist) ir tas pats, ko izmanto lietotnē biļešu sinhronizācijai."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Pēdējā izloze"
+      },
+      "next_draw": {
+        "name": "Nākamā izloze"
+      },
+      "jackpot": {
+        "name": "Džekpots"
+      },
+      "overdue_numbers": {
+        "name": "Visilgāk neizlozētie skaitļi"
+      },
+      "frequent_numbers": {
+        "name": "Visbiežākie skaitļi"
+      },
+      "rare_numbers": {
+        "name": "Retākie skaitļi"
+      },
+      "generated_ticket": {
+        "name": "Ģenerētā biļete"
+      },
+      "my_tickets": {
+        "name": "Manas biļetes"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Ģenerēt biļeti",
+      "description": "Ģenerē biļeti ar 1 līdz 12 kombinācijām (katrā 5 skaitļi + 2 Euro skaitļi), izmantojot skaitļu statistiku, un atgriež kombinācijas un kopējās izmaksas.",
+      "fields": {
+        "columns": {
+          "name": "Kombinācijas",
+          "description": "Kombināciju skaits (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritms",
+          "description": "Kā tiek izvēlēti skaitļi. Automātiskās opcijas izvēlas nejaušu algoritmu katrai biļetei vai kombinācijai."
+        },
+        "period": {
+          "name": "Periods",
+          "description": "Vēstures daļa, uz kuru balstās statistika."
+        },
+        "save": {
+          "name": "Saglabāt kā biļeti",
+          "description": "Pievienot biļeti sadaļai Manas biļetes nākamajai izlozei (un sinhronizācijas gist, ja ir iestatīts token)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analizēt biļeti",
+      "description": "Precīzas laimesta varbūtības, paredzamais laimests un vēstures pārbaude biļetei. Tā ir statistika, nevis prognoze: katrai kombinācijai ir vienādas izredzes.",
+      "fields": {
+        "numbers": {
+          "name": "Skaitļi",
+          "description": "Kombinācijas formātā '5 12 23 34 45 + 3 7', atdalītas ar ';'. Atstāj tukšu, lai izmantotu sinhronizētu biļeti (uid) vai pēdējo ģenerēto biļeti."
+        },
+        "uid": {
+          "name": "Biļetes uid",
+          "description": "Sinhronizētas biļetes uid (skatīt sensoru Manas biļetes)."
+        },
+        "country": {
+          "name": "Valsts",
+          "description": "Valsts kods laimestu kategorijām (GR pievieno Grieķijas 1+1 kategoriju)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Sinhronizēt biļetes",
+      "description": "Tagad apvieno biļetes ar tavu privāto sinhronizācijas gist vietnē GitHub (nepieciešams token opcijās)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automātiski - viens nejaušs algoritms uz biļeti",
+        "auto_column": "Automātiski - nejaušs algoritms uz kombināciju",
+        "random": "Tīri nejauši",
+        "hot": "Karstie skaitļi",
+        "cold": "Aukstie skaitļi",
+        "overdue": "Ilgi neizlozētie skaitļi",
+        "weighted": "Svērts pēc biežuma",
+        "balanced": "Līdzsvarots (karstie + ilgi neizlozētie)",
+        "smart": "Gudrā forma (nepāra/pāra, summa)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Visas izlozes",
+        "10y": "Pēdējie 10 gadi",
+        "5y": "Pēdējie 5 gadi",
+        "3y": "Pēdējie 3 gadi",
+        "1y": "Pēdējais gads",
+        "last_100": "Pēdējās 100 izlozes",
+        "last_50": "Pēdējās 50 izlozes"
+      }
+    }
+  }
+}

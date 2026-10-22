@@ -12,7 +12,7 @@
  * eurojackpot.com style); language (el / en / de) decides the texts. Both are chosen in the panel, remembered
  * in this browser, and can be fixed on a card with `country:` / `language:`.
  */
-const EJ_VERSION = "0.5.0";
+const EJ_VERSION = "0.6.0";
 const DOMAIN = "eurojackpot_analyzer";
 const ASSETS = window.EJ_ASSETS || `/${DOMAIN}/assets`;     // EJ_ASSETS: only the offline preview sets it
 const ID = {
@@ -28,7 +28,7 @@ const ID = {
 const REPO_HA = "https://github.com/VeZReVouLiS/EuroJackpot-Analyzer-HA";
 const REPO_APP = "https://github.com/VeZReVouLiS/EuroJackpot-Analyzer";
 const WEB_APP = "https://vezrevoulis.github.io/EuroJackpot-Analyzer/";
-const LANGS = ["el", "en", "de"];
+const LANGS = ["el", "en", "de"];                   // texts built into this file; every other language is loaded from assets/lang/<code>.json
 const LOCALES = { el: "el-GR", en: "en-GB", de: "de-DE" };
 
 /* the user's choices (menus in the panel, remembered in this browser) beat the Home Assistant settings */
@@ -42,6 +42,7 @@ const ALL_ELEMENTS = new Set();
 let CAT = null;
 fetch(`${ASSETS}/countries.json`).then((r) => r.json()).then((j) => {
   CAT = j;
+  for (const l of Object.keys(CAT.languages)) if (!TEXT[l]) loadLang(l, false);       // a stored choice may be one of the loaded ones
   for (const el of ALL_ELEMENTS) if (el.relang) el.relang();
 }).catch(() => { /* flags and the German layout are optional: the UI works without them */ });
 const supportedCountry = (code) => (CAT ? CAT.countries.find((c) => c.code === code && c.supported) : null);
@@ -305,7 +306,25 @@ const TEXT2 = {
 };
 for (const l of LANGS) Object.assign(TEXT[l], TEXT2[l]);
 const fill = (str, v) => String(str).replace(/\{(\w+)\}/g, (_, k) => (v[k] == null ? "" : v[k]));
-const normLang = (l) => { l = String(l || "").toLowerCase().slice(0, 2); return LANGS.includes(l) ? l : "en"; };
+/* the texts of a language that is not built in: fetched once, then every element is drawn again */
+const LOADING = new Set();
+function loadLang(l, redraw = true) {
+  if (TEXT[l] || LOADING.has(l) || !/^[a-z]{2}$/.test(l)) return;
+  LOADING.add(l);
+  fetch(`${ASSETS}/lang/${l}.json`).then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status)))).then((t) => {
+    const tip = t.tipNum;
+    t.tipNum = (n, g, c, p) => fill(tip, { n, g, c, p });
+    TEXT[l] = t;
+    if (redraw) for (const el of ALL_ELEMENTS) if (el.relang) el.relang();
+  }).catch(() => { /* offline: the English texts stay */ });
+}
+const normLang = (l) => {
+  l = String(l || "").toLowerCase().replace(/^no\b/, "nb").slice(0, 2);
+  if (LANGS.includes(l)) return l;
+  if (CAT && CAT.languages && CAT.languages[l]) { loadLang(l); return TEXT[l] ? l : "en"; }
+  return "en";
+};
+const textFor = (l) => TEXT[l] || TEXT.en;
 
 const STYLE = `
 :host { display: block; }
@@ -476,8 +495,8 @@ class EJBase extends HTMLElement {
     return found ? found.code : "GR";
   }
   get countryInfo() { return supportedCountry(this.country); }
-  get tr() { return TEXT[this.lang]; }
-  get locale() { return LOCALES[this.lang]; }
+  get tr() { return textFor(this.lang); }
+  get locale() { return LOCALES[this.lang] || (CAT && CAT.languages[this.lang] && CAT.languages[this.lang].locale) || "en-GB"; }
   st(id) { return this._hass && this._hass.states[id]; }
   fmtN(n) { return Number(n).toLocaleString(this.locale); }
   fmtMoney(n, digits = 2) {
@@ -892,7 +911,7 @@ class EJPanel extends HTMLElement {
     return `<div class="dd" data-dd="${id}"><button class="tool" data-btn title="${esc(btnLabel)}">${cur ? flag(cur.flag) : ""}<span>${esc(cur ? (cur.short || cur.label) : "")}</span><i class="caret">▾</i></button><div class="menu">${list}</div></div>`;
   }
   _renderBar() {
-    const t = TEXT[this.lang], root = this.shadowRoot;
+    const t = textFor(this.lang), root = this.shadowRoot;
     root.querySelector("[data-sub]").textContent = t.panelSub;
     const refresh = `<button class="tool" data-act="about" title="${esc(t.about)}">ⓘ <span>${esc(t.about)}</span></button><button class="tool" data-act="refresh" title="${t.refresh}">↻ <span>${t.refresh}</span></button>`;
     let menus = "";
@@ -924,7 +943,7 @@ class EJPanel extends HTMLElement {
     let box = root.querySelector("[data-about]");
     if (!this._about) { if (box) box.remove(); return; }
     if (!box) { box = document.createElement("div"); box.dataset.about = ""; root.appendChild(box); }
-    const t = TEXT[this.lang], lines = (k) => String(t[k]).split("\n").filter(Boolean);
+    const t = textFor(this.lang), lines = (k) => String(t[k]).split("\n").filter(Boolean);
     const guide = lines("aboutGuide").map((l) => { const [h, d] = l.split("|"); return `<li><b>${esc(h)}:</b> ${esc(d || "")}</li>`; }).join("");
     const li = (k) => lines(k).map((l) => `<li>${esc(l)}</li>`).join("");
     const a = (url, label) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;

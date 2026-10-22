@@ -1,0 +1,128 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EuroJackpot Analyzer",
+        "description": "Pridá posledné žrebovanie, najbližšie žrebovanie a jackpot, štatistiky čísel a generátor tiketov. Údaje pochádzajú z Allwyn a oficiálnej služby EuroJackpot. Nie je potrebný žiadny účet."
+      }
+    },
+    "abort": {
+      "already_configured": "EuroJackpot Analyzer je už nastavený."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Možnosti EuroJackpot Analyzer",
+        "data": {
+          "scan_interval": "Interval obnovenia (minúty)",
+          "price_per_column": "Cena za stĺpec (€)",
+          "notify_service": "Služba oznámení (napr. notify.mobile_app_my_phone, prázdne = žiadna)",
+          "jackpot_threshold": "Upozorniť na jackpot od (miliónov €, 0 = vypnuté)",
+          "github_token": "Token GitHub na čítanie synchronizovaných tiketov (voliteľné)"
+        },
+        "description": "Upozornenia na nové žrebovania, vysoký jackpot a výsledky tvojich tiketov. Token (oprávnenie: gist) je ten istý, ktorý používaš v aplikácii na synchronizáciu tiketov."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_draw": {
+        "name": "Posledné žrebovanie"
+      },
+      "next_draw": {
+        "name": "Najbližšie žrebovanie"
+      },
+      "jackpot": {
+        "name": "Jackpot"
+      },
+      "overdue_numbers": {
+        "name": "Najdlhšie nevyžrebované čísla"
+      },
+      "frequent_numbers": {
+        "name": "Najčastejšie čísla"
+      },
+      "rare_numbers": {
+        "name": "Najmenej časté čísla"
+      },
+      "generated_ticket": {
+        "name": "Vygenerovaný tiket"
+      },
+      "my_tickets": {
+        "name": "Moje tikety"
+      }
+    }
+  },
+  "services": {
+    "generate_ticket": {
+      "name": "Vygenerovať tiket",
+      "description": "Vygeneruje tiket s 1 až 12 stĺpcami (každý 5 čísel + 2 Euro čísla) podľa štatistík čísel a vráti stĺpce a celkovú cenu.",
+      "fields": {
+        "columns": {
+          "name": "Stĺpce",
+          "description": "Počet stĺpcov (1-12)."
+        },
+        "algorithm": {
+          "name": "Algoritmus",
+          "description": "Ako sa čísla vyberajú. Automatické možnosti zvolia náhodný algoritmus na tiket alebo na stĺpec."
+        },
+        "period": {
+          "name": "Obdobie",
+          "description": "Časť histórie, na ktorej štatistiky stoja."
+        },
+        "save": {
+          "name": "Uložiť ako tiket",
+          "description": "Pridá tiket do Moje tikety na najbližšie žrebovanie (a do tvojho synchronizačného gistu, ak je nastavený token)."
+        }
+      }
+    },
+    "analyze_ticket": {
+      "name": "Analyzovať tiket",
+      "description": "Presné pravdepodobnosti výhry, očakávaná výhra a kontrola histórie pre tiket. Je to štatistika, nie predpoveď: každý stĺpec má rovnakú šancu.",
+      "fields": {
+        "numbers": {
+          "name": "Čísla",
+          "description": "Stĺpce v tvare '5 12 23 34 45 + 3 7', oddelené znakom ';'. Nechaj prázdne, ak chceš použiť synchronizovaný tiket (uid) alebo naposledy vygenerovaný tiket."
+        },
+        "uid": {
+          "name": "Uid tiketu",
+          "description": "Uid synchronizovaného tiketu (pozri senzor Moje tikety)."
+        },
+        "country": {
+          "name": "Krajina",
+          "description": "Kód krajiny pre poradia výhier (GR pridá grécke poradie 1+1)."
+        }
+      }
+    },
+    "sync_tickets": {
+      "name": "Synchronizovať tikety",
+      "description": "Zlúči tikety s tvojím súkromným synchronizačným gistom na GitHube hneď teraz (vyžaduje token v nastaveniach)."
+    }
+  },
+  "selector": {
+    "algorithm": {
+      "options": {
+        "auto_ticket": "Automaticky - jeden náhodný algoritmus na tiket",
+        "auto_column": "Automaticky - náhodný algoritmus na stĺpec",
+        "random": "Čisto náhodne",
+        "hot": "Horúce čísla",
+        "cold": "Studené čísla",
+        "overdue": "Meškajúce čísla",
+        "weighted": "Vážené početnosťou",
+        "balanced": "Vyvážený (horúce + meškajúce)",
+        "smart": "Múdry tvar (nepárne/párne, súčet)"
+      }
+    },
+    "period": {
+      "options": {
+        "all": "Všetky žrebovania",
+        "10y": "Posledných 10 rokov",
+        "5y": "Posledných 5 rokov",
+        "3y": "Posledné 3 roky",
+        "1y": "Posledný rok",
+        "last_100": "Posledných 100 žrebovaní",
+        "last_50": "Posledných 50 žrebovaní"
+      }
+    }
+  }
+}
