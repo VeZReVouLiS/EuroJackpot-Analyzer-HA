@@ -60,7 +60,7 @@ The **My tickets** card (bottom right in the panel) shows your tickets, whether 
 
 It is statistics for information, **not a prediction**: draws are random and every column has the same chances.
 
-**Tickets from the apps (Windows, Mac, Android, iPhone):** in the app go to Settings → Ticket sync and create a GitHub token (`gist` permission, the guide opens the right page). Then put the **same token** into Home Assistant: **Settings → Devices & services → EuroJackpot Analyzer → Configure → GitHub token**. The tickets sync through a private gist of your own account. Tickets you make in Home Assistant with “Save to my tickets” (or `save: true`) show up in the apps too. Without a token the card only shows what you saved here.
+**Tickets from the apps (Windows, Mac, Android, iPhone):** in the app go to Settings → Ticket sync and create a GitHub token (`gist` permission, the guide opens the right page). Then put the **same token** into Home Assistant: **Settings → Devices & services → EuroJackpot Analyzer → Configure → GitHub token**. The tickets sync through a private gist of your own account. Tickets you make in Home Assistant with “Save to my tickets” (or `save: true`) show up in the apps too. Without a token the card only shows what you saved here. The **Google Drive** sync of the apps is not supported in Home Assistant yet: to get the tickets here, choose GitHub in the app.
 
 ## Notifications
 In the **options** (Configure) you can set:
