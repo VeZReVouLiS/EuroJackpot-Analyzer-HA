@@ -68,6 +68,8 @@ In the **options** (Configure) you can set:
 - **Jackpot alert from (million €)**: one notification per draw when the jackpot reaches the limit. `0` = off.
 - **GitHub token** for the ticket sync (optional).
 
+![Options of the integration](docs/images/12-options-en.png)
+
 Notifications: a new draw with its numbers, a high jackpot and the **result of the tickets you played** (only when the draw is from the last 7 days). For your own automations there are the events:
 
 | Event | Content |
