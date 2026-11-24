@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Synkronoi kupongit",
       "description": "Yhdistää kupongit yksityiseen synkronointigistiisi GitHubissa nyt (vaatii tokenin asetuksissa)."
+    },
+    "clear_ticket": {
+      "name": "Tyhjennä kuponki",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

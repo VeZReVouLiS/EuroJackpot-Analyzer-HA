@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Synka kuponger",
       "description": "Slår nu ihop kupongerna med din privata synk-gist på GitHub (kräver token i alternativen)."
+    },
+    "clear_ticket": {
+      "name": "Rensa kupong",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

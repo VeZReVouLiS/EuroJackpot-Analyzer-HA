@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Sünkrooni piletid",
       "description": "Ühendab piletid sinu privaatse sünkroonimisgistiga GitHubis kohe (vajab valikutes tokenit)."
+    },
+    "clear_ticket": {
+      "name": "Tühjenda pilet",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

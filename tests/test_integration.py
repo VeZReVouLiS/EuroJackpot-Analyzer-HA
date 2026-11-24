@@ -91,6 +91,19 @@ async def test_generate_ticket_service(hass: HomeAssistant) -> None:
     assert len({c["algorithm"] for c in auto["columns"]}) > 1
 
 
+async def test_clear_ticket_service(hass: HomeAssistant) -> None:
+    e, patches = await setup_with(hass)
+    await hass.services.async_call(DOMAIN, "generate_ticket", {"columns": 3, "algorithm": "hot", "save": True},
+                                   blocking=True, return_response=True)
+    assert hass.states.get("sensor.eurojackpot_analyzer_generated_ticket").state == "3"
+    await hass.services.async_call(DOMAIN, "clear_ticket", {}, blocking=True)
+    stop(patches)
+    assert hass.states.get("sensor.eurojackpot_analyzer_generated_ticket").state == "unknown"      # ready for a new one
+    assert hass.states.get("sensor.eurojackpot_analyzer_my_tickets").state == "1"                  # the saved ticket stays
+    with pytest.raises(Exception):                                                                # nothing left to analyse
+        await hass.services.async_call(DOMAIN, "analyze_ticket", {}, blocking=True, return_response=True)
+
+
 async def test_service_validation(hass: HomeAssistant) -> None:
     await setup(hass)
     with pytest.raises(Exception):

@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Samstilla miða",
       "description": "Sameinar miðana við einka-samstillingargistið þitt á GitHub núna (krefst tokens í valkostum)."
+    },
+    "clear_ticket": {
+      "name": "Hreinsa miða",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

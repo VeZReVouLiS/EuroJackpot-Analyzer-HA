@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Synchronizovať tikety",
       "description": "Zlúči tikety s tvojím súkromným synchronizačným gistom na GitHube hneď teraz (vyžaduje token v nastaveniach)."
+    },
+    "clear_ticket": {
+      "name": "Vymazať tiket",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

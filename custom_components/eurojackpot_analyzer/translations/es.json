@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Sincronizar boletos",
       "description": "Fusiona ahora los boletos con tu gist de sincronización privado en GitHub (requiere el token en las opciones)."
+    },
+    "clear_ticket": {
+      "name": "Limpiar boleto",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

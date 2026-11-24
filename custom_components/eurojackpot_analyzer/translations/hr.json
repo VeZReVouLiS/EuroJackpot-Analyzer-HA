@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Sinkroniziraj listiće",
       "description": "Odmah spaja listiće s tvojim privatnim gistom za sinkronizaciju na GitHubu (potreban je token u opcijama)."
+    },
+    "clear_ticket": {
+      "name": "Očisti listić",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Scheine synchronisieren",
       "description": "Gleicht die Scheine jetzt mit deinem privaten Sync-Gist bei GitHub ab (Token in den Optionen nötig)."
+    },
+    "clear_ticket": {
+      "name": "Spielschein leeren",
+      "description": "Leert den zuletzt erstellten Spielschein, damit du einen neuen machen kannst. Gespeicherte Scheine bleiben."
     }
   },
   "selector": {

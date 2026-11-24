@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Synchronizuj kupony",
       "description": "Scala teraz kupony z Twoim prywatnym gist synchronizacji na GitHub (wymaga tokenu w opcjach)."
+    },
+    "clear_ticket": {
+      "name": "Wyczyść kupon",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

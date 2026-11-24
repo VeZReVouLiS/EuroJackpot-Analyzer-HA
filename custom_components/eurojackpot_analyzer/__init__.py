@@ -36,6 +36,7 @@ ANALYZE_SCHEMA = vol.Schema({
     vol.Optional("country", default="GR"): cv.string,
 })
 SERVICE_SYNC_TICKETS = "sync_tickets"
+SERVICE_CLEAR_TICKET = "clear_ticket"
 
 type EuroJackpotConfigEntry = ConfigEntry[EuroJackpotCoordinator]
 
@@ -76,11 +77,15 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
             raise HomeAssistantError(str(err)) from err
         await coordinator_of().async_request_refresh()
 
+    async def handle_clear(call: ServiceCall) -> None:
+        await coordinator_of().async_clear_ticket()
+
     hass.services.async_register(DOMAIN, SERVICE_GENERATE_TICKET, handle_generate, schema=GENERATE_SCHEMA,
                                  supports_response=SupportsResponse.OPTIONAL)
     hass.services.async_register(DOMAIN, SERVICE_ANALYZE_TICKET, handle_analyze, schema=ANALYZE_SCHEMA,
                                  supports_response=SupportsResponse.ONLY)
     hass.services.async_register(DOMAIN, SERVICE_SYNC_TICKETS, handle_sync, schema=vol.Schema({}))
+    hass.services.async_register(DOMAIN, SERVICE_CLEAR_TICKET, handle_clear, schema=vol.Schema({}))
     return True
 
 

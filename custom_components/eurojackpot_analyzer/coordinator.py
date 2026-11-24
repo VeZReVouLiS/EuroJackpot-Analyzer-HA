@@ -313,3 +313,9 @@ class EuroJackpotCoordinator(DataUpdateCoordinator[dict]):
         self.async_update_listeners()
         self.hass.bus.async_fire(f"{DOMAIN}_ticket_generated", result)
         return result
+
+    async def async_clear_ticket(self) -> None:
+        """Forget the last generated ticket (tickets saved to "my tickets" stay), so the card is ready for a new one."""
+        self.last_ticket = None
+        await self._ticket_store.async_save({})
+        self.async_update_listeners()

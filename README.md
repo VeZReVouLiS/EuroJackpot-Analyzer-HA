@@ -137,7 +137,7 @@ response_variable: ticket
 
 ![Εκτέλεση του service](docs/images/06-service.png)
 
-## Services `eurojackpot_analyzer.analyze_ticket` και `sync_tickets`
+## Services `eurojackpot_analyzer.analyze_ticket`, `sync_tickets` και `clear_ticket`
 `analyze_ticket` επιστρέφει την ανάλυση (πιθανότητες, αναμενόμενο κόστος/κέρδος, προφίλ και έλεγχο ιστορικού) για:
 - `numbers`: στήλες γραμμένες ως `5 12 23 34 45 + 3 7; 1 2 3 4 5 + 1 2` (χωρισμένες με `;`), ή
 - `uid`: ένα συγχρονισμένο δελτίο (βλ. το `sensor.eurojackpot_analyzer_my_tickets`), ή
@@ -145,6 +145,7 @@ response_variable: ticket
 
 Το `country` (προεπιλογή `GR`) ορίζει τις κατηγορίες κερδών (το `GR` προσθέτει την ελληνική 1 + 1).
 `sync_tickets` συγχρονίζει αμέσως με το gist (χρειάζεται token στις Επιλογές).
+`clear_ticket` καθαρίζει το τελευταίο δελτίο που δημιουργήθηκε (το κουμπί **🧹 Καθαρισμός** της κάρτας δελτίου το καλεί), για να φτιάξεις νέο. Τα δελτία που έχεις αποθηκεύσει στα «Τα δελτία μου» μένουν.
 
 ```yaml
 action: eurojackpot_analyzer.analyze_ticket

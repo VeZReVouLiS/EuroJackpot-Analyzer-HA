@@ -139,7 +139,7 @@ response_variable: ticket
 
 ![Running the service](docs/images/06-service-en.png)
 
-## Services `eurojackpot_analyzer.analyze_ticket` and `sync_tickets`
+## Services `eurojackpot_analyzer.analyze_ticket`, `sync_tickets` and `clear_ticket`
 `analyze_ticket` returns the analysis (odds, expected cost/prize, profile and history check) for:
 - `numbers`: columns written as `5 12 23 34 45 + 3 7; 1 2 3 4 5 + 1 2` (separated by `;`), or
 - `uid`: a synced ticket (see `sensor.eurojackpot_analyzer_my_tickets`), or
@@ -147,6 +147,7 @@ response_variable: ticket
 
 `country` (default `GR`) sets the prize classes (`GR` adds the Greek 1 + 1).
 `sync_tickets` syncs with the gist right away (needs a token in the options).
+`clear_ticket` clears the last generated ticket (the **🧹 Clear** button of the ticket card calls it) so you can make a new one. Tickets you saved to “My tickets” stay.
 
 ```yaml
 action: eurojackpot_analyzer.analyze_ticket

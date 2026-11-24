@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Sinhronizēt biļetes",
       "description": "Tagad apvieno biļetes ar tavu privāto sinhronizācijas gist vietnē GitHub (nepieciešams token opcijās)."
+    },
+    "clear_ticket": {
+      "name": "Notīrīt biļeti",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Sincronizza schedine",
       "description": "Unisce subito le schedine con il tuo gist privato di sincronizzazione su GitHub (serve il token nelle opzioni)."
+    },
+    "clear_ticket": {
+      "name": "Pulisci schedina",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Szelvények szinkronizálása",
       "description": "Most egyesíti a szelvényeket a GitHubon lévő privát szinkron-gisteddel (a beállításokban megadott token szükséges)."
+    },
+    "clear_ticket": {
+      "name": "Szelvény törlése",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Tickets synchroniseren",
       "description": "Voegt de tickets nu samen met je privé-synchronisatie-gist op GitHub (vereist het token in de opties)."
+    },
+    "clear_ticket": {
+      "name": "Lot wissen",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

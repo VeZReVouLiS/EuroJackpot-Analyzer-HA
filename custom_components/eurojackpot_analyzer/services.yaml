@@ -62,3 +62,4 @@ analyze_ticket:
       selector:
         text:
 sync_tickets:
+clear_ticket:

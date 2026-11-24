@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Sync tickets",
       "description": "Merges the tickets with your private sync gist on GitHub now (needs the token in the options)."
+    },
+    "clear_ticket": {
+      "name": "Clear ticket",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

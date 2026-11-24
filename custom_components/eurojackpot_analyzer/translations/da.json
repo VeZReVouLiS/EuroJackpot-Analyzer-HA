@@ -97,6 +97,10 @@
     "sync_tickets": {
       "name": "Synkronisér kuponer",
       "description": "Fletter nu kuponerne med din private synk-gist på GitHub (kræver token i indstillingerne)."
+    },
+    "clear_ticket": {
+      "name": "Ryd kupon",
+      "description": "Clears the last generated ticket so you can make a new one. Tickets you saved stay."
     }
   },
   "selector": {

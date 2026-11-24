@@ -12,7 +12,7 @@
  * eurojackpot.com style); language (el / en / de) decides the texts. Both are chosen in the panel, remembered
  * in this browser, and can be fixed on a card with `country:` / `language:`.
  */
-const EJ_VERSION = "0.6.0";
+const EJ_VERSION = "0.7.0";
 const DOMAIN = "eurojackpot_analyzer";
 const ASSETS = window.EJ_ASSETS || `/${DOMAIN}/assets`;     // EJ_ASSETS: only the offline preview sets it
 const ID = {
@@ -133,6 +133,7 @@ const TEXT2 = {
   "analyzing": "Υπολογισμός…",
   "close": "Κλείσιμο",
   "save": "Αποθήκευση στα δελτία μου",
+  "clear": "Καθαρισμός",
   "resNone": "καμία κερδισμένη στήλη",
   "resPending": "περιμένει την κλήρωση",
   "resWon": "κέρδη σε {n} από {tot} στήλες",
@@ -193,6 +194,7 @@ const TEXT2 = {
   "analyzing": "Calculating…",
   "close": "Close",
   "save": "Save to my tickets",
+  "clear": "Clear",
   "resNone": "no winning column",
   "resPending": "waiting for the draw",
   "resWon": "{n} of {tot} columns won",
@@ -253,6 +255,7 @@ const TEXT2 = {
   "analyzing": "Berechne …",
   "close": "Schließen",
   "save": "In Meine Scheine speichern",
+  "clear": "Leeren",
   "resNone": "keine Gewinnreihe",
   "resPending": "wartet auf die Ziehung",
   "resWon": "{n} von {tot} Reihen gewonnen",
@@ -721,10 +724,10 @@ class EJTicketCard extends EJBase {
     if (a) {
       const rows = a.columns.map((c, i) => `<div class="col" title="${t.column} ${i + 1}"><span class="no">${i + 1}</span>
         <div class="balls nowrap">${c.numbers.map((n) => this.ball(n, "sm")).join("")}<span class="sep"></span>${c.euro_numbers.map((n) => this.ball(n, "euro sm")).join("")}</div>
-        <span class="tg">${esc(t.short[c.algorithm] || c.algorithm)}</span></div>`).join("");
+        <span class="tg" title="${esc(t.algos[c.algorithm] || c.algorithm)}">${esc(t.short[c.algorithm] || c.algorithm)}</span></div>`).join("");
       result = `${rows}<div class="total"><div><div class="label">${t.total}</div><div class="sub">${a.column_count} × ${this.fmtMoney(a.price_per_column)}</div></div>
         <div class="sum">${this.fmtMoney(a.total_cost)}</div></div>
-        <div class="controls" style="margin-top:.8em"><button class="minor" data-an="">📊 ${t.analyze}</button></div>`;
+        <div class="controls" style="margin-top:.8em"><button class="minor" data-an="">📊 ${t.analyze}</button><button class="minor" data-act="clear">🧹 ${t.clear || TEXT.en.clear}</button></div>`;
     }
     root.innerHTML = this.shell(`
       <div class="head"><div class="title"><div class="logo"><span>🎟️</span></div><div><b>${t.ticket}</b><span class="sub">× ${this.fmtMoney(price)} ${t.perColumn}</span></div></div></div>
@@ -742,6 +745,8 @@ class EJTicketCard extends EJBase {
     q('[data-act="algo"]').onchange = (e) => { this._algo = e.target.value; };
     q('[data-act="save"]').onchange = (e) => { this._save = e.target.checked; };
     q('[data-act="go"]').onclick = () => this._generate();
+    const clr = q('[data-act="clear"]');
+    if (clr) clr.onclick = () => this._hass.callService(DOMAIN, "clear_ticket", {});     // forget the generated ticket, to start a new one
   }
 }
 
