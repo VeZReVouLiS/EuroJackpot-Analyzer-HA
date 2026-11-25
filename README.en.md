@@ -97,6 +97,10 @@ All accept `language: el`, `en` or `de` and `country: GR` or `DE` if you want a 
 
 ![The cards on a dashboard](docs/images/03-dashboard-cards-en.png)
 
+On the ticket card, after generating, **🧹 Clear** clears the ticket so you can make a new one, and hovering the tag of a column (Hot, Weighted, Smart, ...) shows the full algorithm name:
+
+![The ticket card with the Clear button](docs/images/13-ticket-card-en.png)
+
 ## Entities
 | Entity | Value | Attributes |
 |---|---|---|
